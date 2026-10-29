@@ -11,6 +11,7 @@ import { GameOverScene } from '@/game/scenes/GameOverScene'
 import { GameScene } from '@/game/scenes/GameScene'
 import { MenuScene } from '@/game/scenes/MenuScene'
 import { PreloadScene } from '@/game/scenes/PreloadScene'
+import { SettingsScene } from '@/game/scenes/SettingsScene'
 import { SERVICES_KEY, type Services } from '@/game/services'
 import { GestureInput } from '@/input/GestureInput'
 import { InputController } from '@/input/InputController'
@@ -39,7 +40,7 @@ const game = new Phaser.Game({
   height: GAME_CONFIG.height,
   backgroundColor: '#000000',
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [BootScene, PreloadScene, MenuScene, GameScene, GameOverScene],
+  scene: [BootScene, PreloadScene, MenuScene, GameScene, GameOverScene, SettingsScene],
   callbacks: {
     preBoot: (instance) => instance.registry.set(SERVICES_KEY, services),
     postBoot: (instance) => {

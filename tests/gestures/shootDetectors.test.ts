@@ -13,12 +13,11 @@ const run = (
   detector: ShootDetector,
   frames: HandFrame[],
   aimOf: (index: number) => AimPoint = () => ({ x: 0.5, y: 0.5 }),
-  poseActive = true,
 ): ShootEvent[] => {
   const shots: ShootEvent[] = []
   frames.forEach((frame, index) => {
     const out: ShootEvent = { x: 0, y: 0, t: 0 }
-    const sample: GestureSample = { frame, aim: aimOf(index), poseActive }
+    const sample: GestureSample = { frame, aim: aimOf(index) }
     if (detector.update(sample, out)) shots.push(out)
   })
   return shots
@@ -56,11 +55,6 @@ describe('ThumbDropDetector', () => {
     expect(run(detector, frames)).toHaveLength(2)
   })
 
-  it('fires without requiring the gun pose', () => {
-    const frames = thumbSequence([0, 0, 1, 1])
-    expect(run(new ThumbDropDetector(0.5), frames, undefined, false)).toHaveLength(1)
-  })
-
   it('lower sensitivity requires a deeper drop', () => {
     const shallow = thumbSequence([0, 0, 0.5, 0.5, 0.5])
     expect(run(new ThumbDropDetector(1), shallow)).toHaveLength(1)
@@ -85,10 +79,6 @@ describe('RecoilDetector', () => {
 
   it('ignores a downward impulse', () => {
     expect(run(new RecoilDetector(0.5), risingHand(-0.1, 6))).toHaveLength(0)
-  })
-
-  it('does not fire while the gun pose is inactive', () => {
-    expect(run(new RecoilDetector(0.5), risingHand(0.1, 6), undefined, false)).toHaveLength(0)
   })
 
   it('takes the shot position from before the impulse', () => {

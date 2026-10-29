@@ -127,12 +127,12 @@ describe('GestureMachine', () => {
     expect(ctx.recorded.poses).toEqual([])
   })
 
-  it('does not use recoil without the gun pose', () => {
+  it('shoots with recoil without the gun pose', () => {
     const recoil = setup({ gestureMode: 'recoil' })
     recoil.push(openHand(), 20)
     for (let i = 0; i < 8; i++) recoil.push(openHand({ y: 0.8 - 0.0125 * (i + 1) }))
     recoil.push(openHand({ y: 0.7 }), 3)
-    expect(recoil.recorded.shots).toHaveLength(0)
+    expect(recoil.recorded.shots).toHaveLength(1)
   })
 
   it('emits trackingLost and drops the pose when the hand disappears', () => {

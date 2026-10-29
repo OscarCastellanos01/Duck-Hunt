@@ -4,6 +4,7 @@ export const SCENE_KEYS = {
   menu: 'Menu',
   game: 'Game',
   gameOver: 'GameOver',
+  settings: 'Settings',
 } as const
 
 export interface GameOverData {

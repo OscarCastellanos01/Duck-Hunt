@@ -51,7 +51,7 @@ export class MenuScene extends Phaser.Scene {
       new Button(
         this,
         centerX,
-        240,
+        215,
         'Play with camera',
         BUTTON_WIDTH,
         BUTTON_HEIGHT,
@@ -62,18 +62,23 @@ export class MenuScene extends Phaser.Scene {
       new Button(
         this,
         centerX,
-        320,
+        285,
         'Play with mouse',
         BUTTON_WIDTH,
         BUTTON_HEIGHT,
         () => void this.play('mouse'),
       ),
     )
+    buttons.add(
+      new Button(this, centerX, 355, 'Settings', BUTTON_WIDTH, BUTTON_HEIGHT, () =>
+        this.scene.start(SCENE_KEYS.settings),
+      ),
+    )
 
     this.add
       .text(
         centerX,
-        400,
+        425,
         'Shape your hand like a pistol to aim. Drop your thumb to shoot.\nCamera video is processed on this device only. Nothing is recorded or uploaded.',
         {
           fontFamily: FONT,
@@ -87,7 +92,7 @@ export class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(UI_DEPTH)
     this.status = this.add
-      .text(centerX, 470, '', {
+      .text(centerX, 490, '', {
         fontFamily: FONT,
         fontSize: '22px',
         color: '#ffd23f',

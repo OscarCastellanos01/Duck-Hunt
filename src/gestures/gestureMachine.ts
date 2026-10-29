@@ -53,7 +53,6 @@ export class GestureMachine {
     this.sample = {
       frame: { landmarks: [], t: 0, aspect: 1 },
       aim: this.aim,
-      poseActive: false,
     }
   }
 
@@ -100,7 +99,6 @@ export class GestureMachine {
 
     const poseActive = pose === 'gun'
     this.sample.frame = frame
-    this.sample.poseActive = poseActive
     const fired = this.detector.update(this.sample, this.shot)
 
     if (frame.t < this.cooldownUntil) {

@@ -5,7 +5,6 @@ import { LM, handSize, lerp, thumbSpread } from '@/gestures/handGeometry'
 export interface GestureSample {
   frame: HandFrame
   aim: AimPoint
-  poseActive: boolean
 }
 
 export interface ShootDetector {
@@ -116,7 +115,6 @@ export class RecoilDetector implements ShootDetector {
     const size = handSize(frame)
     if (!base || size <= 0) return false
     this.push(frame.t, base.y / size, aim)
-    if (!sample.poseActive) return false
 
     const windowStart = this.findAtOrBefore(frame.t - RECOIL_THRESHOLDS.windowMs)
     if (!windowStart) return false
