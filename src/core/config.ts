@@ -107,7 +107,7 @@ export const GAME_CONFIG = {
   spawnMargin: 80,
   fallSpeed: 520,
   groundY: 470,
-  duckSpriteFacesLeft: true,
+  duckSpriteFacesLeft: false,
 }
 
 export type DuckType = 'common' | 'fast' | 'golden'
