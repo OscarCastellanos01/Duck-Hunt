@@ -51,9 +51,9 @@ describe('ThumbDropDetector', () => {
     expect(run(detector, frames)).toHaveLength(2)
   })
 
-  it('does not fire while the gun pose is inactive', () => {
+  it('fires without requiring the gun pose', () => {
     const frames = thumbSequence([0, 0, 1, 1])
-    expect(run(new ThumbDropDetector(0.5), frames, undefined, false)).toHaveLength(0)
+    expect(run(new ThumbDropDetector(0.5), frames, undefined, false)).toHaveLength(1)
   })
 
   it('lower sensitivity requires a deeper drop', () => {

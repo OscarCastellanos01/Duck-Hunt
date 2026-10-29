@@ -131,7 +131,7 @@ MediaPipe landmarks (21 points): 0 wrist; 1-4 thumb (CMC, MCP, IP, TIP); 5-8 ind
 
 Setting `gestureMode`: `'thumb' | 'recoil' | 'both'`. **Default: `'thumb'`**.
 
-1. **`thumb` — thumb drop (the hammer).** The thumb drops toward the middle finger or the index base without moving the hand. Computed as the distance from the thumb tip (4) to the middle finger base (9), normalized by hand size. A shot fires when the threshold is crossed downward (with hysteresis to rearm). It is a pose change detectable in 1-2 frames and does not move the aim.
+1. **`thumb` — thumb drop (the hammer).** The thumb drops toward the middle finger or the index base without moving the hand. Computed as the distance from the thumb tip (4) to the middle finger base (9), normalized by hand size. A shot fires when the threshold is crossed downward (with hysteresis to rearm). It does not require the gun pose, so it works even when the pose is not recognized. It is a pose change detectable in 1-2 frames and does not move the aim.
 2. **`recoil` — upward kick.** With the gun pose active, an upward vertical impulse of the hand (index base or wrist) above a normalized velocity threshold within a short window (~100-150 ms). **Design constraint:** because the hand rises when firing, the aim shifts. The shot position is therefore taken from a **circular buffer** of positions, using the aim from ~100-150 ms _before_ the impulse (parameter `recoilAimLookbackMs`).
 3. **`both`**: either gesture fires. They share the same cooldown to avoid double shots.
 
@@ -141,7 +141,7 @@ The gun pose requires an extended thumb only to be entered. Once active, the thu
 
 ### State machine
 
-`Idle` (no hand or no pose) → `Gun` (stable pose) → `Shoot` (emits `shoot`) → `Cooldown` (250 ms by default, configurable) → back to `Gun` if the pose persists, or to `Idle`.
+`Idle` (no hand or no pose) → `Gun` (stable pose) → `Shoot` (emits `shoot`) → `Cooldown` (250 ms by default, configurable) → back to `Gun` if the pose persists, or to `Idle`. The `thumb` gesture can fire from `Idle`; the `recoil` gesture requires `Gun`.
 
 If tracking is lost: emit `trackingLost`, freeze the aim for about 300 ms, then show an on-screen notice.
 

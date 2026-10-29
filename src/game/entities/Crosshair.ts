@@ -14,13 +14,11 @@ export class Crosshair extends Phaser.GameObjects.Image {
     const off = bus.on('aim', ({ x, y }) => {
       this.setPosition(x * GAME_CONFIG.width, y * GAME_CONFIG.height)
     })
-    const offPose = bus.on('poseChanged', ({ pose }) =>
-      this.setAlpha(pose === 'gun' ? 1 : IDLE_ALPHA),
-    )
+    const offFound = bus.on('trackingFound', () => this.setAlpha(1))
     const offLost = bus.on('trackingLost', () => this.setAlpha(IDLE_ALPHA))
     scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       off()
-      offPose()
+      offFound()
       offLost()
     })
   }

@@ -33,7 +33,7 @@ export class ThumbDropDetector implements ShootDetector {
       if (spread >= this.rearmThreshold) this.armed = true
       return false
     }
-    if (spread > this.fireThreshold || !sample.poseActive) return false
+    if (spread > this.fireThreshold) return false
     this.armed = false
     out.x = sample.aim.x
     out.y = sample.aim.y

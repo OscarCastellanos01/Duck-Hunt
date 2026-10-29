@@ -103,15 +103,11 @@ export class GestureMachine {
     this.sample.poseActive = poseActive
     const fired = this.detector.update(this.sample, this.shot)
 
-    if (!poseActive) {
-      this.currentState = 'idle'
-      return
-    }
     if (frame.t < this.cooldownUntil) {
       this.currentState = 'cooldown'
       return
     }
-    this.currentState = 'gun'
+    this.currentState = poseActive ? 'gun' : 'idle'
     if (!fired) return
     this.cooldownUntil = frame.t + this.settings.cooldownMs
     this.currentState = 'cooldown'
