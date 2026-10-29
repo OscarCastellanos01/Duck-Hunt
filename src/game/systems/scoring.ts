@@ -16,6 +16,10 @@ export class ScoreKeeper {
     return Math.min(1 + this.streakCount * GAME_CONFIG.streakStep, GAME_CONFIG.maxMultiplier)
   }
 
+  get atMaxMultiplier(): boolean {
+    return this.multiplier >= GAME_CONFIG.maxMultiplier
+  }
+
   registerHit(basePoints: number): number {
     const awarded = Math.round(basePoints * this.multiplier)
     this.total += awarded
@@ -27,7 +31,10 @@ export class ScoreKeeper {
     this.streakCount = 0
   }
 
-  addBonus(points: number): void {
-    this.total += points
+  registerPenalty(points: number): number {
+    const applied = Math.min(this.total, Math.abs(points))
+    this.total -= applied
+    this.streakCount = 0
+    return applied
   }
 }

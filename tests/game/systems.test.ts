@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { DIFFICULTY_CONFIG, GAME_CONFIG } from '@/core/config'
+import { GAME_CONFIG, LANES, TARGET_LAYOUT } from '@/core/config'
 import { Ammo } from '@/game/systems/ammo'
 import { getDifficulty } from '@/game/systems/difficulty'
-import { DuckMotion } from '@/game/systems/duckMotion'
+import { GameTimer } from '@/game/systems/gameTimer'
 import { findHitTarget } from '@/game/systems/hitTest'
-import { RoundManager } from '@/game/systems/rounds'
 import { ScoreKeeper } from '@/game/systems/scoring'
-import { createDuckSpec, pickDuckType, type DuckSpec } from '@/game/systems/spawner'
+import { LaneSpawner, PopupSpawner, type SpawnRequest } from '@/game/systems/spawner'
+import { TargetMotion } from '@/game/systems/targetMotion'
+import { bullseyePoints, pickLaneTarget, pickPopupTarget } from '@/game/systems/targets'
 
 const sequence = (...values: number[]) => {
   let i = 0
@@ -14,108 +15,128 @@ const sequence = (...values: number[]) => {
 }
 
 describe('difficulty', () => {
-  it('increases speed and shortens waves as rounds progress', () => {
-    const early = getDifficulty(1)
-    const late = getDifficulty(8)
-    expect(late.speed).toBeGreaterThan(early.speed)
-    expect(late.waveDurationMs).toBeLessThan(early.waveDurationMs)
-    expect(late.unpredictability).toBeGreaterThan(early.unpredictability)
+  it('ramps speed, decoys and popup frequency over the game', () => {
+    const start = getDifficulty(0)
+    const end = getDifficulty(GAME_CONFIG.durationMs)
+    expect(end.speedMultiplier).toBeGreaterThan(start.speedMultiplier)
+    expect(end.decoyChance).toBeGreaterThan(start.decoyChance)
+    expect(end.popupIntervalMs).toBeLessThan(start.popupIntervalMs)
   })
 
-  it('adds simultaneous ducks at the configured rounds', () => {
-    expect(getDifficulty(1).ducksPerWave).toBe(1)
-    expect(getDifficulty(DIFFICULTY_CONFIG.secondDuckRound).ducksPerWave).toBe(2)
-    expect(getDifficulty(DIFFICULTY_CONFIG.thirdDuckRound).ducksPerWave).toBe(3)
-  })
-
-  it('caps its values', () => {
-    const extreme = getDifficulty(500)
-    expect(extreme.speed).toBeLessThanOrEqual(
-      DIFFICULTY_CONFIG.baseSpeed * DIFFICULTY_CONFIG.maxSpeedMultiplier,
-    )
-    expect(extreme.waveDurationMs).toBe(DIFFICULTY_CONFIG.waveDurationMinMs)
-    expect(extreme.unpredictability).toBe(DIFFICULTY_CONFIG.unpredictabilityMax)
+  it('clamps progress outside the game duration', () => {
+    expect(getDifficulty(-1000).progress).toBe(0)
+    expect(getDifficulty(GAME_CONFIG.durationMs * 3).progress).toBe(1)
   })
 })
 
-describe('spawner', () => {
-  it('picks duck types by probability bands', () => {
-    const difficulty = getDifficulty(1)
-    expect(pickDuckType(difficulty, () => 0)).toBe('golden')
-    expect(pickDuckType(difficulty, () => difficulty.goldenChance + 0.001)).toBe('fast')
-    expect(pickDuckType(difficulty, () => 0.99)).toBe('common')
+describe('target selection', () => {
+  const difficulty = getDifficulty(0)
+
+  it('picks lane targets by probability bands', () => {
+    expect(pickLaneTarget(difficulty, () => 0)).toBe('golden')
+    expect(pickLaneTarget(difficulty, () => 0.05)).toBe('decoy')
+    expect(pickLaneTarget(difficulty, () => 0.99)).toBe('duck')
   })
 
-  it('spawns outside the play area heading inward', () => {
-    const left = createDuckSpec(getDifficulty(1), sequence(0.99, 0.1, 0.4, 0.5, 0.5, 0.5, 0.5, 0.2))
-    const right = createDuckSpec(
-      getDifficulty(1),
-      sequence(0.99, 0.9, 0.4, 0.5, 0.5, 0.5, 0.5, 0.2),
-    )
-    expect(left.x).toBeLessThan(GAME_CONFIG.playBounds.left)
-    expect(left.vx).toBeGreaterThan(0)
-    expect(right.x).toBeGreaterThan(GAME_CONFIG.playBounds.right)
-    expect(right.vx).toBeLessThan(0)
+  it('picks popup targets by probability bands', () => {
+    expect(pickPopupTarget(() => 0)).toBe('golden')
+    expect(pickPopupTarget(() => 0.2)).toBe('decoy')
+    expect(pickPopupTarget(() => 0.4)).toBe('bullseye')
+    expect(pickPopupTarget(() => 0.99)).toBe('duck')
   })
 
-  it('only schedules direction changes once the difficulty is unpredictable', () => {
-    expect(createDuckSpec(getDifficulty(1), Math.random).turnIntervalMs).toBeNull()
-    expect(createDuckSpec(getDifficulty(5), Math.random).turnIntervalMs).not.toBeNull()
+  it('scores bullseyes by ring', () => {
+    expect(bullseyePoints(0.1)).toBe(200)
+    expect(bullseyePoints(0.5)).toBe(100)
+    expect(bullseyePoints(0.9)).toBe(50)
+    expect(bullseyePoints(5)).toBe(50)
   })
 })
 
-const baseSpec = (overrides: Partial<DuckSpec> = {}): DuckSpec => ({
-  type: 'common',
+describe('LaneSpawner', () => {
+  it('eventually spawns in every lane, entering from the lane side', () => {
+    const spawner = new LaneSpawner(Math.random)
+    const out: SpawnRequest[] = []
+    for (let i = 0; i < 400; i++) spawner.update(50, getDifficulty(0), out)
+    for (const lane of LANES.keys()) expect(out.some((r) => r.lane === lane)).toBe(true)
+    for (const request of out) {
+      const direction = LANES[request.lane]?.direction ?? 1
+      expect(Math.sign(request.vx)).toBe(direction)
+      if (direction > 0) expect(request.x).toBeLessThan(0)
+      else expect(request.x).toBeGreaterThan(GAME_CONFIG.width)
+    }
+  })
+
+  it('spawns faster as the game progresses', () => {
+    const count = (elapsed: number) => {
+      const spawner = new LaneSpawner(sequence(0.5, 0.99))
+      const out: SpawnRequest[] = []
+      for (let i = 0; i < 200; i++) spawner.update(50, getDifficulty(elapsed), out)
+      return out.length
+    }
+    expect(count(GAME_CONFIG.durationMs)).toBeGreaterThan(count(0))
+  })
+})
+
+describe('PopupSpawner', () => {
+  it('waits for the first delay and then spawns inside the play area', () => {
+    const spawner = new PopupSpawner(Math.random, 1000)
+    const out: SpawnRequest[] = []
+    spawner.update(900, getDifficulty(0), out)
+    expect(out).toHaveLength(0)
+    spawner.update(200, getDifficulty(0), out)
+    expect(out).toHaveLength(1)
+    expect(out[0]?.kind).toBe('popup')
+    expect(out[0]?.x).toBeGreaterThanOrEqual(TARGET_LAYOUT.popupMarginX)
+    expect(out[0]?.x).toBeLessThanOrEqual(GAME_CONFIG.width - TARGET_LAYOUT.popupMarginX)
+  })
+})
+
+const laneRequest = (overrides: Partial<SpawnRequest> = {}): SpawnRequest => ({
+  kind: 'lane',
+  lane: 0,
+  type: 'duck',
   x: -50,
-  y: 200,
   vx: 200,
-  vy: 0,
-  wobbleAmplitude: 0,
-  wobbleFrequency: 1,
-  wobblePhase: 0,
-  turnIntervalMs: null,
   ...overrides,
 })
 
-describe('DuckMotion', () => {
-  it('flies into the play area without bouncing at the entry edge', () => {
-    const motion = new DuckMotion(baseSpec(), () => 0.5)
+describe('TargetMotion', () => {
+  it('moves along the lane and finishes after leaving the screen', () => {
+    const motion = new TargetMotion(laneRequest())
     motion.step(100)
-    expect(motion.vx).toBeGreaterThan(0)
-    for (let i = 0; i < 20; i++) motion.step(100)
-    expect(motion.x).toBeGreaterThan(0)
+    expect(motion.x).toBeGreaterThan(-50)
+    expect(motion.hittable).toBe(true)
+    for (let i = 0; i < 100; i++) motion.step(100)
+    expect(motion.phase).toBe('done')
   })
 
-  it('bounces off the right edge after entering', () => {
-    const motion = new DuckMotion(baseSpec({ x: 900, vx: 400 }), () => 0.5)
-    for (let i = 0; i < 20; i++) motion.step(100)
-    expect(motion.vx).toBeLessThan(0)
-    expect(motion.x).toBeLessThanOrEqual(GAME_CONFIG.playBounds.right)
+  it('finishes when leaving on the left side', () => {
+    const motion = new TargetMotion(laneRequest({ x: 1000, vx: -300 }))
+    for (let i = 0; i < 100; i++) motion.step(100)
+    expect(motion.phase).toBe('done')
   })
 
-  it('bounces off the top and bottom bounds', () => {
-    const motion = new DuckMotion(baseSpec({ x: 400, vx: 0, vy: -300, y: 100 }), () => 0.5)
-    for (let i = 0; i < 20; i++) motion.step(100)
-    expect(motion.y).toBeGreaterThanOrEqual(GAME_CONFIG.playBounds.top)
+  it('pops up, stays and goes back down', () => {
+    const motion = new TargetMotion(laneRequest({ kind: 'popup', vx: 0, x: 400 }))
+    expect(motion.hittable).toBe(false)
+    motion.step(TARGET_LAYOUT.popupRiseMs + 10)
+    expect(motion.phase).toBe('up')
+    expect(motion.offsetY).toBe(0)
+    expect(motion.hittable).toBe(true)
+    motion.step(TARGET_LAYOUT.popupStayMs + 10)
+    expect(motion.phase).toBe('falling')
+    motion.step(TARGET_LAYOUT.popupFallMs + 10)
+    expect(motion.phase).toBe('done')
+    expect(motion.hittable).toBe(false)
   })
 
-  it('changes heading when a turn is due', () => {
-    const motion = new DuckMotion(
-      baseSpec({ x: 400, vx: 200, turnIntervalMs: 500 }),
-      sequence(0.5, 0.1),
-    )
-    const before = Math.atan2(motion.vy, motion.vx)
-    for (let i = 0; i < 8; i++) motion.step(100)
-    expect(Math.atan2(motion.vy, motion.vx)).not.toBeCloseTo(before, 1)
-  })
-
-  it('leaves the screen upward after escaping', () => {
-    const motion = new DuckMotion(baseSpec({ x: 400 }), () => 0.5)
-    motion.step(100)
-    motion.escape()
-    expect(motion.state).toBe('escaping')
-    for (let i = 0; i < 40; i++) motion.step(100)
-    expect(motion.offscreen).toBe(true)
+  it('becomes hittable only once it has risen enough', () => {
+    const motion = new TargetMotion(laneRequest({ kind: 'popup', vx: 0, x: 400 }))
+    motion.step(TARGET_LAYOUT.popupRiseMs * 0.2)
+    expect(motion.hittable).toBe(false)
+    motion.step(TARGET_LAYOUT.popupRiseMs * 0.5)
+    expect(motion.hittable).toBe(true)
   })
 })
 
@@ -155,6 +176,7 @@ describe('ScoreKeeper', () => {
     expect(score.registerHit(100)).toBe(125)
     for (let i = 0; i < 20; i++) score.registerHit(100)
     expect(score.multiplier).toBe(GAME_CONFIG.maxMultiplier)
+    expect(score.atMaxMultiplier).toBe(true)
   })
 
   it('resets the streak on a miss', () => {
@@ -164,42 +186,55 @@ describe('ScoreKeeper', () => {
     expect(score.streak).toBe(0)
     expect(score.registerHit(200)).toBe(200)
   })
+
+  it('applies penalties without going below zero and resets the streak', () => {
+    const score = new ScoreKeeper()
+    score.registerHit(100)
+    score.registerHit(100)
+    expect(score.registerPenalty(-150)).toBe(150)
+    expect(score.score).toBe(75)
+    expect(score.streak).toBe(0)
+    expect(score.registerPenalty(-150)).toBe(75)
+    expect(score.score).toBe(0)
+  })
 })
 
 describe('Ammo', () => {
-  it('consumes and reloads', () => {
+  it('consumes, empties and reloads after the delay', () => {
     const ammo = new Ammo(3)
-    expect(ammo.consume()).toBe(true)
+    ammo.consume()
     ammo.consume()
     ammo.consume()
     expect(ammo.empty).toBe(true)
     expect(ammo.consume()).toBe(false)
-    ammo.reload()
+    ammo.startReload(1000)
+    expect(ammo.reloading).toBe(true)
+    expect(ammo.tick(400)).toBe(false)
+    expect(ammo.remaining).toBe(0)
+    expect(ammo.tick(700)).toBe(true)
+    expect(ammo.reloading).toBe(false)
     expect(ammo.remaining).toBe(3)
+  })
+
+  it('cannot fire while reloading', () => {
+    const ammo = new Ammo(2)
+    ammo.consume()
+    ammo.startReload(500)
+    expect(ammo.consume()).toBe(false)
   })
 })
 
-describe('RoundManager', () => {
-  it('advances waves and clears the round when the quota is met', () => {
-    const rounds = new RoundManager()
-    const waves = GAME_CONFIG.wavesPerRound
-    for (let i = 1; i < waves; i++) expect(rounds.finishWave(1)).toBe('next-wave')
-    expect(rounds.finishWave(1)).toBe('round-cleared')
-  })
-
-  it('ends the game when the quota is missed', () => {
-    const rounds = new RoundManager()
-    for (let i = 1; i < GAME_CONFIG.wavesPerRound; i++) rounds.finishWave(0)
-    expect(rounds.finishWave(0)).toBe('game-over')
-  })
-
-  it('starts the next round at wave one with higher difficulty', () => {
-    const rounds = new RoundManager()
-    const speed = rounds.difficulty.speed
-    rounds.nextRound()
-    expect(rounds.round).toBe(2)
-    expect(rounds.wave).toBe(1)
-    expect(rounds.hits).toBe(0)
-    expect(rounds.difficulty.speed).toBeGreaterThan(speed)
+describe('GameTimer', () => {
+  it('counts down, accepts bonuses and reports expiry', () => {
+    const timer = new GameTimer(1000)
+    timer.tick(600)
+    expect(timer.remainingMs).toBe(400)
+    expect(timer.elapsedMs).toBe(600)
+    timer.addBonus(500)
+    expect(timer.remainingMs).toBe(900)
+    expect(timer.expired).toBe(false)
+    timer.tick(1000)
+    expect(timer.expired).toBe(true)
+    expect(timer.remainingMs).toBe(0)
   })
 })

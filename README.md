@@ -1,18 +1,31 @@
 # duck-gesture
 
-A duck shooting gallery game, inspired by the classic Duck Hunt mechanic, that you play with your hand in front of the camera. Shape your hand like a pistol to aim and use a gesture to shoot. Everything runs in the browser: no server, no accounts, and the camera video never leaves your device.
+A carnival shooting gallery that you play with your hand in front of the camera: point with your index finger to aim and use a gesture to shoot. Everything runs in the browser: no server, no accounts, and the camera video never leaves your device.
 
 > This project was built with the help of AI. For that reason, English is the primary language of the code, documentation and interface.
 
 ## How it works
 
-- **Aim:** the tip of your index finger controls the crosshair.
-- **Gun pose:** extended index finger, thumb pointing up, and the middle, ring and little fingers curled.
+- **Aim:** the tip of your index finger controls the crosshair, and a rifle on screen follows it.
 - **Shoot:** one of two gestures, selectable in the settings.
   - `thumb`: drop your thumb like a hammer (default).
   - `recoil`: flick your hand upward like a pistol kick.
   - `both`: either gesture fires.
 - **Fallback:** a mouse input provider lets you play without a camera.
+
+## Gameplay
+
+You have 60 seconds and a six-shot magazine that reloads automatically. Targets on sticks cross the water in three lanes, and more pop up from below:
+
+| Target                  | Points                               |
+| ----------------------- | ------------------------------------ |
+| Yellow duck             | 100                                  |
+| Mallard (faster)        | 150                                  |
+| Bullseye                | 50, 100 or 200 depending on the ring |
+| Golden duck (very fast) | 300 and +3 seconds                   |
+| Grey decoy              | -150 and the streak is lost          |
+
+Consecutive hits raise a score multiplier up to x4, and a miss resets it. The game gets faster, with more decoys and pop-ups, as the time runs out.
 
 Hand tracking uses the MediaPipe Hand Landmarker. Gesture logic (One Euro Filter smoothing and a small state machine) is plain TypeScript, and the game itself is built with Phaser 3.
 
@@ -91,4 +104,4 @@ Only freely licensed assets are used (CC0, such as the Kenney "Shooting Gallery"
 
 ## Status
 
-The game is playable with the mouse or the camera: rounds, waves, three duck types, ammo, streak scoring, sound effects, a stored high score, a settings screen and a camera setup screen. Measured performance numbers are tracked in `docs/perf.md`.
+The game is playable with the mouse or the camera: timed rounds, five target types, a magazine with reloading, streak scoring, sound effects, a stored high score, a settings screen and a camera setup screen. Measured performance numbers are tracked in `docs/perf.md`.

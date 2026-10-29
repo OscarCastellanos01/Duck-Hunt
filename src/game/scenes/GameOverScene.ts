@@ -19,18 +19,19 @@ export class GameOverScene extends Phaser.Scene {
     const services = getServices(this)
     if (data.newRecord) this.sound.play('record')
     const centerX = GAME_CONFIG.width / 2
+    const accuracy = data.shots > 0 ? Math.round((data.hits / data.shots) * 100) : 0
     const style = { fontFamily: FONT, color: '#ffffff', stroke: '#000000', strokeThickness: 6 }
     createBackdrop(this)
-    this.add
-      .text(centerX, 100, 'Game over', { ...style, fontSize: '72px' })
-      .setOrigin(0.5)
-      .setDepth(UI_DEPTH)
+    this.add.image(centerX, 100, 'textGameOver').setScale(1.4).setDepth(UI_DEPTH)
     this.add
       .text(centerX, 190, `Score ${data.score}`, { ...style, fontSize: '40px' })
       .setOrigin(0.5)
       .setDepth(UI_DEPTH)
     this.add
-      .text(centerX, 240, `Reached round ${data.round}`, { ...style, fontSize: '26px' })
+      .text(centerX, 240, `Hits ${data.hits} / Shots ${data.shots}  -  Accuracy ${accuracy}%`, {
+        ...style,
+        fontSize: '26px',
+      })
       .setOrigin(0.5)
       .setDepth(UI_DEPTH)
     const best = data.newRecord ? 'New record!' : `Best ${services.highScore.get()}`

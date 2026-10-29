@@ -94,8 +94,8 @@ src/
   debug/                   # metrics, debug overlay, camera preview, landmark renderer, fixture recorder, synthetic hand
   game/
     scenes/                # Boot, Preload, Calibration, Menu, Game, GameOver, Settings
-    entities/              # Duck, Crosshair, ...
-    systems/               # spawner, scoring, rounds, ammo, difficulty
+    entities/              # Target, Rifle, Crosshair
+    systems/               # spawner, target motion, scoring, ammo, game timer, difficulty
     ui/                    # HUD, debug overlay, settings panel
   assets/
     manifest.ts            # single place that maps logical names → files
@@ -200,8 +200,11 @@ Changes must apply live, without reloading. Validate stored values on load (if c
 
 ## Game design (baseline)
 
-- Rounds with ducks flying along different trajectories; 3 shots per wave; score depends on the duck type and the streak.
-- Progressive difficulty: higher speed, more simultaneous ducks, less predictable trajectories.
+- A timed shooting gallery (60 seconds) set in a carnival stall: three lanes of targets on sticks move across the water in alternating directions, and extra targets pop up from the water at random positions.
+- Target types: yellow ducks (100), mallards (150, faster), bullseyes (50 to 200 depending on the ring hit), golden ducks (300, very fast, +3 seconds) and grey decoys (-150 points and the streak is lost).
+- Six-shot magazine with an automatic reload delay; consecutive hits raise a score multiplier and a miss resets it.
+- Progressive difficulty within the time limit: higher speed, more decoys and more frequent pop-up targets.
+- A rifle at the bottom of the screen follows the aim, so the hand movement is reflected in the scene.
 - **Generous** hitboxes (gestures have more latency and less precision than a click) and a small aim-assist margin, both configurable in `config.ts`.
 - Clear feedback on every shot: sound, flash, particles, slight camera shake, floating score text.
 - High score stored in `localStorage`.

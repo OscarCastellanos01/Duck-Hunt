@@ -1,19 +1,26 @@
 export type ImageKey =
-  | 'bgBlue'
-  | 'cloud1'
-  | 'cloud2'
-  | 'treeOak'
-  | 'treePine'
-  | 'grass1'
-  | 'grass2'
-  | 'curtain'
-  | 'duckCommon'
-  | 'duckFast'
+  | 'wall'
+  | 'curtainTop'
+  | 'curtainSide'
+  | 'water1'
+  | 'water2'
+  | 'stick'
+  | 'duckYellow'
+  | 'duckBrown'
   | 'duckGolden'
+  | 'duckDecoy'
+  | 'targetBull'
+  | 'rifle'
+  | 'holeBrown'
+  | 'holeBlue'
   | 'crosshair'
   | 'bulletIcon'
   | 'bulletEmptyIcon'
   | 'duckIcon'
+  | 'textReady'
+  | 'textGo'
+  | 'textTimeUp'
+  | 'textGameOver'
 
 export type AudioKey =
   | 'shoot'
@@ -25,6 +32,8 @@ export type AudioKey =
   | 'gameOver'
   | 'select'
   | 'record'
+  | 'penalty'
+  | 'tick'
 
 export interface AssetManifest {
   images: Record<ImageKey, string>
@@ -33,21 +42,28 @@ export interface AssetManifest {
 
 const baseManifest: AssetManifest = {
   images: {
-    bgBlue: '/assets/PNG/Stall/bg_blue.png',
-    cloud1: '/assets/PNG/Stall/cloud1.png',
-    cloud2: '/assets/PNG/Stall/cloud2.png',
-    treeOak: '/assets/PNG/Stall/tree_oak.png',
-    treePine: '/assets/PNG/Stall/tree_pine.png',
-    grass1: '/assets/PNG/Stall/grass1.png',
-    grass2: '/assets/PNG/Stall/grass2.png',
-    curtain: '/assets/PNG/Stall/curtain_straight.png',
-    duckCommon: '/assets/PNG/Objects/duck_brown.png',
-    duckFast: '/assets/PNG/Objects/duck_white.png',
-    duckGolden: '/assets/PNG/Objects/duck_yellow.png',
+    wall: '/assets/PNG/Stall/bg_wood.png',
+    curtainTop: '/assets/PNG/Stall/curtain_straight.png',
+    curtainSide: '/assets/PNG/Stall/curtain.png',
+    water1: '/assets/PNG/Stall/water1.png',
+    water2: '/assets/PNG/Stall/water2.png',
+    stick: '/assets/PNG/Objects/stick_wood.png',
+    duckYellow: '/assets/PNG/Objects/duck_yellow.png',
+    duckBrown: '/assets/PNG/Objects/duck_brown.png',
+    duckGolden: '/assets/PNG/Objects/duck_target_yellow.png',
+    duckDecoy: '/assets/PNG/Objects/duck_back.png',
+    targetBull: '/assets/PNG/Objects/target_colored.png',
+    rifle: '/assets/PNG/Objects/rifle.png',
+    holeBrown: '/assets/PNG/Objects/shot_brown_large.png',
+    holeBlue: '/assets/PNG/Objects/shot_blue_small.png',
     crosshair: '/assets/PNG/HUD/crosshair_red_large.png',
     bulletIcon: '/assets/PNG/HUD/icon_bullet_gold_short.png',
     bulletEmptyIcon: '/assets/PNG/HUD/icon_bullet_empty_short.png',
     duckIcon: '/assets/PNG/HUD/icon_duck.png',
+    textReady: '/assets/PNG/HUD/text_ready.png',
+    textGo: '/assets/PNG/HUD/text_go.png',
+    textTimeUp: '/assets/PNG/HUD/text_timeup.png',
+    textGameOver: '/assets/PNG/HUD/text_gameover.png',
   },
   audio: {
     shoot: '/audio/shoot.wav',
@@ -59,6 +75,8 @@ const baseManifest: AssetManifest = {
     gameOver: '/audio/gameOver.wav',
     select: '/audio/select.wav',
     record: '/audio/record.wav',
+    penalty: '/audio/penalty.wav',
+    tick: '/audio/tick.wav',
   },
 }
 

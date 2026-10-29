@@ -86,87 +86,106 @@ export const DEBUG_CONFIG = {
 export const GAME_CONFIG = {
   width: 960,
   height: 540,
-  ammoPerWave: 3,
-  wavesPerRound: 5,
-  roundQuota: 0.6,
-  introMs: 1500,
-  waveEndMs: 1200,
-  spawnStaggerMs: 500,
-  escapeDelayMs: 700,
-  hitboxScale: 1.3,
-  aimAssistPx: 18,
+  durationMs: 60_000,
+  magazineSize: 6,
+  reloadMs: 1100,
+  hitboxScale: 1.25,
+  aimAssistPx: 16,
   streakStep: 0.25,
-  maxMultiplier: 3,
-  roundClearBonus: 500,
+  maxMultiplier: 4,
+  readyMs: 1100,
+  goMs: 600,
+  timeUpMs: 1800,
+  lowTimeMs: 10_000,
   shakeDurationMs: 80,
   shakeIntensity: 0.004,
-  flashAlpha: 0.25,
+  flashAlpha: 0.2,
   flashMs: 90,
   floatingTextMs: 800,
-  playBounds: { left: 0, right: 960, top: 60, bottom: 400 },
-  spawnMargin: 80,
-  fallSpeed: 520,
-  groundY: 470,
-  duckSpriteFacesLeft: false,
+  holeLifetimeMs: 2500,
+  spawnMargin: 90,
 }
 
-export type DuckType = 'common' | 'fast' | 'golden'
+export type TargetType = 'duck' | 'mallard' | 'bullseye' | 'golden' | 'decoy'
 
-export const DUCK_TYPES: Record<DuckType, { points: number; speed: number; scale: number }> = {
-  common: { points: 100, speed: 1, scale: 1 },
-  fast: { points: 200, speed: 1.5, scale: 0.85 },
-  golden: { points: 500, speed: 2, scale: 0.7 },
+export interface TargetSpec {
+  texture: string
+  points: number
+  speed: number
+  scale: number
+  timeBonusMs: number
+}
+
+export const TARGET_TYPES: Record<TargetType, TargetSpec> = {
+  duck: { texture: 'duckYellow', points: 100, speed: 1, scale: 1, timeBonusMs: 0 },
+  mallard: { texture: 'duckBrown', points: 150, speed: 1.4, scale: 0.9, timeBonusMs: 0 },
+  bullseye: { texture: 'targetBull', points: 100, speed: 0.7, scale: 0.9, timeBonusMs: 0 },
+  golden: { texture: 'duckGolden', points: 300, speed: 1.9, scale: 0.8, timeBonusMs: 3000 },
+  decoy: { texture: 'duckDecoy', points: -150, speed: 1, scale: 1, timeBonusMs: 0 },
+}
+
+export const BULLSEYE_RINGS = [
+  { maxRatio: 0.3, points: 200 },
+  { maxRatio: 0.65, points: 100 },
+  { maxRatio: 1, points: 50 },
+]
+
+export const LANES = [
+  { waterY: 250, direction: 1, speed: 90, scale: 0.8 },
+  { waterY: 335, direction: -1, speed: 125, scale: 0.95 },
+  { waterY: 420, direction: 1, speed: 165, scale: 1.1 },
+] as const
+
+export const TARGET_LAYOUT = {
+  stickHeight: 56,
+  stickSink: 22,
+  stickWidth: 30,
+  targetOverlap: 6,
+  popupHideDepth: 130,
+  popupRiseMs: 260,
+  popupStayMs: 1300,
+  popupFallMs: 200,
+  spacingMin: 260,
+  spacingMax: 460,
+  popupMarginX: 160,
+  knockAngleDeg: 75,
+  knockDropPx: 30,
+  knockMs: 420,
 }
 
 export const DIFFICULTY_CONFIG = {
-  baseSpeed: 180,
-  speedPerRound: 0.12,
-  maxSpeedMultiplier: 2.5,
-  fastChanceBase: 0.1,
-  fastChancePerRound: 0.05,
-  fastChanceMax: 0.5,
-  goldenChanceBase: 0.03,
-  goldenChancePerRound: 0.01,
-  goldenChanceMax: 0.15,
-  secondDuckRound: 3,
-  thirdDuckRound: 6,
-  waveDurationBaseMs: 7000,
-  waveDurationPerRoundMs: 300,
-  waveDurationMinMs: 4000,
-  unpredictabilityPerRound: 0.15,
-  unpredictabilityMax: 0.9,
-  turnIntervalSlowMs: 2500,
-  turnIntervalFastMs: 900,
-  wobbleAmplitudeMin: 8,
-  wobbleAmplitudeMax: 30,
-  wobbleFrequencyMin: 1.5,
-  wobbleFrequencyMax: 4,
-  launchAngleMaxRad: 0.6,
-  escapeSpeed: 420,
+  speedGain: 0.6,
+  decoyBase: 0.12,
+  decoyMax: 0.22,
+  goldenChance: 0.03,
+  bullseyeChance: 0.15,
+  mallardChance: 0.2,
+  popupStartMs: 2400,
+  popupEndMs: 1200,
 }
 
-export const DUCK_ANIMATION = {
-  flapRate: 16,
-  flapSquash: 0.08,
-  flapStretch: 0.04,
-  escapeFlapMultiplier: 1.6,
-  tiltMaxDeg: 22,
-  tiltFactor: 0.4,
-  tiltSmoothing: 0.15,
-  escapeTiltDeg: -25,
-  stunMs: 180,
-  stunScale: 1.2,
-  stunTint: 0xff7070,
+export const POPUP_WEIGHTS = { golden: 0.08, decoy: 0.2, bullseye: 0.45 }
+
+export const RIFLE_CONFIG = {
+  x: 560,
+  baseY: 620,
+  scale: 0.9,
+  barrelLeanRad: 0.253,
+  kickPx: 14,
+  kickMs: 90,
 }
 
 export const FX_CONFIG = {
   feathersPerHit: 14,
   goldenExtraSparks: 10,
   dustPerMiss: 6,
-  confettiCount: 24,
   particleLifespanMs: 700,
-  perfectBannerMs: 900,
   lightHintDelayMs: 3000,
-  featherTints: { common: 0x8b5a2b, fast: 0xffffff, golden: 0xffd23f },
-  confettiTints: [0xff5252, 0xffd23f, 0x6fe37a, 0x4aa3ff, 0xffffff],
+  tints: {
+    duck: 0xffd23f,
+    mallard: 0x8b5a2b,
+    bullseye: 0xff7a2f,
+    golden: 0xffd23f,
+    decoy: 0x9fb8bd,
+  },
 }

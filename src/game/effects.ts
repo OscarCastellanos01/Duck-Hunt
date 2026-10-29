@@ -1,5 +1,5 @@
 import type Phaser from 'phaser'
-import { FX_CONFIG, type DuckType } from '@/core/config'
+import { FX_CONFIG, type TargetType } from '@/core/config'
 
 const FEATHER_KEY = 'fxFeather'
 const SPARK_KEY = 'fxSpark'
@@ -46,17 +46,20 @@ const burst = (scene: Phaser.Scene, x: number, y: number, options: BurstOptions)
   scene.time.delayedCall(FX_CONFIG.particleLifespanMs + 100, () => emitter.destroy())
 }
 
-export const duckHitEffect = (scene: Phaser.Scene, x: number, y: number, type: DuckType): void => {
-  burst(scene, x, y, {
-    texture: FEATHER_KEY,
-    count: FX_CONFIG.feathersPerHit,
-    tint: FX_CONFIG.featherTints[type],
-  })
+export const targetHitEffect = (
+  scene: Phaser.Scene,
+  x: number,
+  y: number,
+  type: TargetType,
+): void => {
+  const tint = FX_CONFIG.tints[type]
+  const texture = type === 'bullseye' ? SPARK_KEY : FEATHER_KEY
+  burst(scene, x, y, { texture, count: FX_CONFIG.feathersPerHit, tint })
   if (type === 'golden') {
     burst(scene, x, y, {
       texture: SPARK_KEY,
       count: FX_CONFIG.goldenExtraSparks,
-      tint: FX_CONFIG.featherTints.golden,
+      tint,
       gravity: 0,
     })
   }
@@ -69,13 +72,5 @@ export const missEffect = (scene: Phaser.Scene, x: number, y: number): void => {
     tint: 0xdddddd,
     gravity: 0,
     speed: { min: 30, max: 90 },
-  })
-}
-
-export const confettiEffect = (scene: Phaser.Scene, x: number, y: number): void => {
-  burst(scene, x, y, {
-    texture: SPARK_KEY,
-    count: FX_CONFIG.confettiCount,
-    tint: FX_CONFIG.confettiTints,
   })
 }

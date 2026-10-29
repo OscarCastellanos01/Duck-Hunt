@@ -1,50 +1,65 @@
-import { DIFFICULTY_CONFIG, DUCK_TYPES, GAME_CONFIG, type DuckType } from '@/core/config'
+import { GAME_CONFIG, LANES, TARGET_LAYOUT, TARGET_TYPES, type TargetType } from '@/core/config'
 import type { Difficulty } from '@/game/systems/difficulty'
+import { pickLaneTarget, pickPopupTarget, type Rng } from '@/game/systems/targets'
 
-export type Rng = () => number
-
-export interface DuckSpec {
-  type: DuckType
+export interface SpawnRequest {
+  kind: 'lane' | 'popup'
+  lane: number
+  type: TargetType
   x: number
-  y: number
   vx: number
-  vy: number
-  wobbleAmplitude: number
-  wobbleFrequency: number
-  wobblePhase: number
-  turnIntervalMs: number | null
 }
 
 const between = (min: number, max: number, rng: Rng): number => min + (max - min) * rng()
 
-export const pickDuckType = (difficulty: Difficulty, rng: Rng): DuckType => {
-  const roll = rng()
-  if (roll < difficulty.goldenChance) return 'golden'
-  if (roll < difficulty.goldenChance + difficulty.fastChance) return 'fast'
-  return 'common'
+export class LaneSpawner {
+  private readonly gaps: number[]
+
+  constructor(private readonly rng: Rng) {
+    this.gaps = LANES.map(() => between(0, TARGET_LAYOUT.spacingMin, rng))
+  }
+
+  update(dtMs: number, difficulty: Difficulty, out: SpawnRequest[]): void {
+    const { width, spawnMargin } = GAME_CONFIG
+    LANES.forEach((lane, index) => {
+      const laneSpeed = lane.speed * difficulty.speedMultiplier
+      const gap = (this.gaps[index] ?? 0) - (laneSpeed * dtMs) / 1000
+      this.gaps[index] = gap
+      if (gap > 0) return
+      const type = pickLaneTarget(difficulty, this.rng)
+      this.gaps[index] = between(TARGET_LAYOUT.spacingMin, TARGET_LAYOUT.spacingMax, this.rng)
+      out.push({
+        kind: 'lane',
+        lane: index,
+        type,
+        x: lane.direction > 0 ? -spawnMargin : width + spawnMargin,
+        vx: lane.direction * laneSpeed * TARGET_TYPES[type].speed,
+      })
+    })
+  }
 }
 
-export const createDuckSpec = (difficulty: Difficulty, rng: Rng): DuckSpec => {
-  const c = DIFFICULTY_CONFIG
-  const { playBounds, spawnMargin } = GAME_CONFIG
-  const type = pickDuckType(difficulty, rng)
-  const speed = difficulty.speed * DUCK_TYPES[type].speed
-  const fromLeft = rng() < 0.5
-  const launchAngle = between(-c.launchAngleMaxRad, c.launchAngleMaxRad, rng)
-  const direction = fromLeft ? 1 : -1
-  const unpredictable = difficulty.unpredictability > 0
-  return {
-    type,
-    x: fromLeft ? playBounds.left - spawnMargin : playBounds.right + spawnMargin,
-    y: between(playBounds.top + 40, playBounds.bottom - 40, rng),
-    vx: direction * speed * Math.cos(launchAngle),
-    vy: speed * Math.sin(launchAngle),
-    wobbleAmplitude: between(c.wobbleAmplitudeMin, c.wobbleAmplitudeMax, rng),
-    wobbleFrequency: between(c.wobbleFrequencyMin, c.wobbleFrequencyMax, rng),
-    wobblePhase: between(0, Math.PI * 2, rng),
-    turnIntervalMs: unpredictable
-      ? c.turnIntervalSlowMs -
-        (c.turnIntervalSlowMs - c.turnIntervalFastMs) * difficulty.unpredictability
-      : null,
+export class PopupSpawner {
+  private remainingMs: number
+
+  constructor(
+    private readonly rng: Rng,
+    firstDelayMs: number,
+  ) {
+    this.remainingMs = firstDelayMs
+  }
+
+  update(dtMs: number, difficulty: Difficulty, out: SpawnRequest[]): void {
+    this.remainingMs -= dtMs
+    if (this.remainingMs > 0) return
+    this.remainingMs = difficulty.popupIntervalMs
+    const margin = TARGET_LAYOUT.popupMarginX
+    out.push({
+      kind: 'popup',
+      lane: Math.floor(this.rng() * LANES.length),
+      type: pickPopupTarget(this.rng),
+      x: between(margin, GAME_CONFIG.width - margin, this.rng),
+      vx: 0,
+    })
   }
 }

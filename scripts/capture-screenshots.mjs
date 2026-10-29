@@ -8,7 +8,7 @@ const VIEWPORT = { width: 1280, height: 720 }
 const GAME_WIDTH = 960
 const MENU_CAMERA_BUTTON = [480, 215]
 const CALIBRATION_PRIMARY_BUTTON = [340, 405]
-const GAMEPLAY_DELAY_MS = 6000
+const GAMEPLAY_DELAY_MS = 12000
 
 const activeScene = (page) => page.evaluate(() => window.__duckGesture?.activeScene() ?? null)
 

@@ -10,6 +10,7 @@ export const SCENE_KEYS = {
 
 export interface GameOverData {
   score: number
-  round: number
+  hits: number
+  shots: number
   newRecord: boolean
 }

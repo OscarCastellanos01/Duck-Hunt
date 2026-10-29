@@ -52,6 +52,17 @@ const sounds = {
   },
   select: { preset: 'blipSelect', params: { sound_vol: 0.2 } },
   record: { preset: 'pickupCoin', params: { p_arp_mod: 0.4, p_arp_speed: 0.5, sound_vol: 0.25 } },
+  penalty: {
+    preset: 'hitHurt',
+    params: {
+      wave_type: SAW,
+      p_base_freq: 0.25,
+      p_freq_ramp: -0.2,
+      p_env_decay: 0.3,
+      sound_vol: 0.25,
+    },
+  },
+  tick: { preset: 'blipSelect', params: { p_base_freq: 0.6, p_env_decay: 0.05, sound_vol: 0.15 } },
 }
 
 const seededRandom = (seed) => {
