@@ -57,9 +57,23 @@ pnpm dev
 
 ## Screenshots
 
-| Menu                               | Camera setup                                      | Gameplay                                   |
-| ---------------------------------- | ------------------------------------------------- | ------------------------------------------ |
-| ![Menu](docs/screenshots/menu.png) | ![Camera setup](docs/screenshots/calibration.png) | ![Gameplay](docs/screenshots/gameplay.png) |
+There are two game modes, each one in its own branch.
+
+### Duck Hunter (branch `master`)
+
+Rounds of waves where ducks fly across the sky and you get three shots per wave.
+
+| Menu                                           | Camera setup                                                  | Gameplay                                               |
+| ---------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------ |
+| ![Menu](docs/screenshots/duck-hunter-menu.png) | ![Camera setup](docs/screenshots/duck-hunter-calibration.png) | ![Gameplay](docs/screenshots/duck-hunter-gameplay.png) |
+
+### Shooting gallery (branch `feature/shooting-gallery`)
+
+A 60 second carnival stall with lanes of targets on sticks, pop-up targets, decoys and a rifle that follows your aim.
+
+| Menu                                       | Camera setup                                              | Gameplay                                           |
+| ------------------------------------------ | --------------------------------------------------------- | -------------------------------------------------- |
+| ![Menu](docs/screenshots/gallery-menu.png) | ![Camera setup](docs/screenshots/gallery-calibration.png) | ![Gameplay](docs/screenshots/gallery-gameplay.png) |
 
 The camera screenshots use a simulated hand: opening the app with `?demo` replaces the camera with a synthetic hand skeleton that goes through the same gesture recognition and shoots on its own. `pnpm capture:screenshots` regenerates them against the preview server.
 

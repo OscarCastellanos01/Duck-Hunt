@@ -4,6 +4,7 @@ import { chromium } from '@playwright/test'
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:4173'
 const OUTPUT_DIR = new URL('../docs/screenshots/', import.meta.url)
+const SCREENSHOT_PREFIX = 'duck-hunter'
 const VIEWPORT = { width: 1280, height: 720 }
 const GAME_WIDTH = 960
 const MENU_CAMERA_BUTTON = [480, 215]
@@ -25,7 +26,7 @@ const clickGame = async (page, [x, y]) => {
 }
 
 const shot = (page, name) =>
-  page.screenshot({ path: fileURLToPath(new URL(`${name}.png`, OUTPUT_DIR)) })
+  page.screenshot({ path: fileURLToPath(new URL(`${SCREENSHOT_PREFIX}-${name}.png`, OUTPUT_DIR)) })
 
 await mkdir(OUTPUT_DIR, { recursive: true })
 const browser = await chromium.launch({ channel: 'chrome' })
