@@ -41,6 +41,11 @@ describe('ThumbDropDetector', () => {
     expect(shots[0]?.t).toBe(2 * FRAME_INTERVAL_MS)
   })
 
+  it('ignores a slow thumb movement', () => {
+    const slow = thumbSequence(Array.from({ length: 120 }, (_, i) => i / 119))
+    expect(run(new ThumbDropDetector(0.5), slow)).toHaveLength(0)
+  })
+
   it('does not fire if the thumb starts down', () => {
     expect(run(new ThumbDropDetector(0.5), thumbSequence([1, 1, 1, 1]))).toHaveLength(0)
   })
@@ -57,7 +62,7 @@ describe('ThumbDropDetector', () => {
   })
 
   it('lower sensitivity requires a deeper drop', () => {
-    const shallow = thumbSequence([0, 0, 0.88, 0.88, 0.88])
+    const shallow = thumbSequence([0, 0, 0.5, 0.5, 0.5])
     expect(run(new ThumbDropDetector(1), shallow)).toHaveLength(1)
     expect(run(new ThumbDropDetector(0), shallow)).toHaveLength(0)
   })

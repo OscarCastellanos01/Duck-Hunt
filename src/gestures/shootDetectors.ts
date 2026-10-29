@@ -13,32 +13,69 @@ export interface ShootDetector {
   reset(): void
 }
 
+interface SpreadEntry {
+  t: number
+  spread: number
+}
+
 export class ThumbDropDetector implements ShootDetector {
-  private armed = false
-  private readonly fireThreshold: number
-  private readonly rearmThreshold: number
+  private readonly history: SpreadEntry[] = Array.from({ length: HISTORY_CAPACITY }, () => ({
+    t: 0,
+    spread: 0,
+  }))
+  private head = 0
+  private count = 0
+  private armed = true
+  private trough = 0
+  private readonly requiredDrop: number
 
   constructor(sensitivity: number) {
-    this.fireThreshold = lerp(THUMB_THRESHOLDS.fireMin, THUMB_THRESHOLDS.fireMax, sensitivity)
-    this.rearmThreshold = this.fireThreshold + THUMB_THRESHOLDS.rearmGap
+    this.requiredDrop = lerp(THUMB_THRESHOLDS.dropMax, THUMB_THRESHOLDS.dropMin, sensitivity)
   }
 
   reset(): void {
-    this.armed = false
+    this.head = 0
+    this.count = 0
+    this.armed = true
   }
 
   update(sample: GestureSample, out: ShootEvent): boolean {
     const spread = thumbSpread(sample.frame)
+    const now = sample.frame.t
+    this.push(now, spread)
     if (!this.armed) {
-      if (spread >= this.rearmThreshold) this.armed = true
+      this.trough = Math.min(this.trough, spread)
+      const rearmAt = this.trough + this.requiredDrop * THUMB_THRESHOLDS.rearmFraction
+      if (spread >= rearmAt) this.armed = true
       return false
     }
-    if (spread > this.fireThreshold) return false
+    if (this.recentPeak(now) - spread < this.requiredDrop) return false
     this.armed = false
+    this.trough = spread
     out.x = sample.aim.x
     out.y = sample.aim.y
-    out.t = sample.frame.t
+    out.t = now
     return true
+  }
+
+  private push(t: number, spread: number): void {
+    const entry = this.history[this.head]
+    if (!entry) return
+    entry.t = t
+    entry.spread = spread
+    this.head = (this.head + 1) % HISTORY_CAPACITY
+    this.count = Math.min(this.count + 1, HISTORY_CAPACITY)
+  }
+
+  private recentPeak(now: number): number {
+    const cutoff = now - THUMB_THRESHOLDS.windowMs
+    let peak = 0
+    for (let i = 1; i <= this.count; i++) {
+      const entry = this.history[(this.head - i + HISTORY_CAPACITY * 2) % HISTORY_CAPACITY]
+      if (!entry || entry.t < cutoff) break
+      if (entry.spread > peak) peak = entry.spread
+    }
+    return peak
   }
 }
 

@@ -59,9 +59,10 @@ export const POSE_THRESHOLDS = {
 }
 
 export const THUMB_THRESHOLDS = {
-  fireMin: 0.4,
-  fireMax: 0.75,
-  rearmGap: 0.08,
+  dropMin: 0.2,
+  dropMax: 0.5,
+  windowMs: 500,
+  rearmFraction: 0.5,
 }
 
 export const RECOIL_THRESHOLDS = {
