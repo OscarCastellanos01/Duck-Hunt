@@ -57,6 +57,8 @@ pnpm typecheck       # tsc --noEmit
 pnpm lint
 pnpm test            # vitest
 pnpm e2e             # playwright
+pnpm build:pages     # setup:mediapipe + build, used by Cloudflare Pages
+pnpm generate:icons  # regenerates public/icons with Chrome through Playwright
 pnpm generate:sfx    # regenerates public/audio/*.wav with jsfxr
 pnpm setup:mediapipe # copies the tasks-vision .wasm files to public/mediapipe/wasm and downloads the model
 ```

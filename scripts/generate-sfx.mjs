@@ -24,11 +24,20 @@ const sounds = {
   },
   empty: {
     preset: 'click',
-    params: { wave_type: NOISE, p_env_sustain: 0.01, p_env_decay: 0.05, p_base_freq: 0.85, sound_vol: 0.2 },
+    params: {
+      wave_type: NOISE,
+      p_env_sustain: 0.01,
+      p_env_decay: 0.05,
+      p_base_freq: 0.85,
+      sound_vol: 0.2,
+    },
   },
   hit: { preset: 'hitHurt', params: { sound_vol: 0.25 } },
   hitGolden: { preset: 'pickupCoin', params: { sound_vol: 0.25 } },
-  reload: { preset: 'blipSelect', params: { p_base_freq: 0.35, p_env_decay: 0.12, sound_vol: 0.2 } },
+  reload: {
+    preset: 'blipSelect',
+    params: { p_base_freq: 0.35, p_env_decay: 0.12, sound_vol: 0.2 },
+  },
   roundClear: { preset: 'powerUp', params: { sound_vol: 0.25 } },
   gameOver: {
     preset: 'hitHurt',

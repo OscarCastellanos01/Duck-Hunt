@@ -55,6 +55,24 @@ pnpm dev
 | `pnpm test`         | Run unit tests with Vitest                     |
 | `pnpm generate:sfx` | Regenerate the sound effects in `public/audio` |
 
+## Testing
+
+Unit tests (`pnpm test`) cover the gesture logic and the game rules. End-to-end tests (`pnpm e2e`) run the production build in Chrome with a fake camera: they check that the app starts, reaches the menu, plays with the mouse, loads the hand tracking model, starts the camera and persists settings. They need `pnpm setup:mediapipe` to have been run once.
+
+## Deployment
+
+The app is a static site and is deployed on Cloudflare Pages with these settings:
+
+| Setting                | Value                    |
+| ---------------------- | ------------------------ |
+| Build command          | `pnpm build:pages`       |
+| Build output directory | `dist`                   |
+| Node.js version        | 24 (see `.node-version`) |
+
+`pnpm build:pages` downloads the hand tracking model and copies the WASM runtime before building, because those files are not stored in the repository. `public/_headers` sets long immutable caching for `/mediapipe`, `/models` and `/assets`, and no caching for the entry point and the service worker.
+
+The app is also an installable PWA. The service worker precaches the application shell and caches the model and the WASM runtime the first time they are used, so the first visit is not delayed. Use `pnpm generate:icons` to regenerate the icons in `public/icons`.
+
 ## Privacy
 
 The camera video is processed locally in your browser. Nothing is recorded or uploaded.
@@ -65,4 +83,4 @@ Only freely licensed assets are used (CC0, such as the Kenney "Shooting Gallery"
 
 ## Status
 
-Early development. The game is playable with the mouse or the camera: rounds, waves, three duck types, ammo, streak scoring and a stored high score.
+The game is playable with the mouse or the camera: rounds, waves, three duck types, ammo, streak scoring, sound effects, a stored high score, a settings screen and a camera setup screen. Measured performance numbers are tracked in `docs/perf.md`.

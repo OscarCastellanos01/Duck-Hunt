@@ -69,6 +69,15 @@ window.addEventListener('keydown', (event) => {
   if (event.key.toLowerCase() === MUTE_KEY && !event.repeat) game.sound.mute = !game.sound.mute
 })
 
+if (new URLSearchParams(window.location.search).has('e2e')) {
+  Object.assign(window, {
+    __duckGesture: {
+      activeScene: () => game.scene.getScenes(true)[0]?.scene.key ?? null,
+      inputMode: () => input.mode,
+    },
+  })
+}
+
 window.addEventListener('beforeunload', () => {
   input.stop()
   game.destroy(true)
