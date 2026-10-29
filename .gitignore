@@ -1,0 +1,7 @@
+node_modules
+dist
+assets-local
+src/assets/manifest.local.ts
+*.local
+.DS_Store
+CLAUDE.local.md
