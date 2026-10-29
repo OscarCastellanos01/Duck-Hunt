@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { fixtureToSteps, parseFixture, serializeFrame } from '@/gestures/fixture'
-import { makeHand } from '../helpers/handFactory'
+import { makeHand } from '@/debug/syntheticHand'
 
 describe('fixture', () => {
   it('round-trips recorded frames', () => {

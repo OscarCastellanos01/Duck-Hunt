@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { POSE_THRESHOLDS } from '@/core/config'
 import type { HandFrame } from '@/core/types'
 import { PoseDetector } from '@/gestures/poseDetector'
-import { makeHand, openHand } from '../helpers/handFactory'
+import { makeHand, openHand } from '@/debug/syntheticHand'
 
 const feed = (detector: PoseDetector, frame: HandFrame | null, count: number) => {
   for (let i = 0; i < count; i++) detector.update(frame)

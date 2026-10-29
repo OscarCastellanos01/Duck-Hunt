@@ -55,6 +55,14 @@ pnpm dev
 | `pnpm test`         | Run unit tests with Vitest                     |
 | `pnpm generate:sfx` | Regenerate the sound effects in `public/audio` |
 
+## Screenshots
+
+| Menu                               | Camera setup                                      | Gameplay                                   |
+| ---------------------------------- | ------------------------------------------------- | ------------------------------------------ |
+| ![Menu](docs/screenshots/menu.png) | ![Camera setup](docs/screenshots/calibration.png) | ![Gameplay](docs/screenshots/gameplay.png) |
+
+The camera screenshots use a simulated hand: opening the app with `?demo` replaces the camera with a synthetic hand skeleton that goes through the same gesture recognition and shoots on its own. `pnpm capture:screenshots` regenerates them against the preview server.
+
 ## Testing
 
 Unit tests (`pnpm test`) cover the gesture logic and the game rules. End-to-end tests (`pnpm e2e`) run the production build in Chrome with a fake camera: they check that the app starts, reaches the menu, plays with the mouse, loads the hand tracking model, starts the camera and persists settings. They need `pnpm setup:mediapipe` to have been run once.

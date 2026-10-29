@@ -7,7 +7,7 @@ import {
   normalizedDistance,
   thumbSpread,
 } from '@/gestures/handGeometry'
-import { makeHand, openHand } from '../helpers/handFactory'
+import { makeHand, openHand } from '@/debug/syntheticHand'
 
 describe('handGeometry', () => {
   it('measures hand size as wrist to middle base distance', () => {

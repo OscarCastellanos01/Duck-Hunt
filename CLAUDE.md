@@ -58,6 +58,7 @@ pnpm lint
 pnpm test            # vitest
 pnpm e2e             # playwright
 pnpm build:pages     # setup:mediapipe + build, used by Cloudflare Pages
+pnpm capture:screenshots # captures docs/screenshots with a simulated hand (needs the preview server)
 pnpm generate:icons  # regenerates public/icons with Chrome through Playwright
 pnpm generate:sfx    # regenerates public/audio/*.wav with jsfxr
 pnpm setup:mediapipe # copies the tasks-vision .wasm files to public/mediapipe/wasm and downloads the model
@@ -79,6 +80,7 @@ src/
     InputProvider.ts       # common interface
     InputController.ts     # switches the active provider (mouse or camera)
     GestureInput.ts        # camera provider: tracker + camera + gesture machine
+    SimulatedHandInput.ts  # demo provider (?demo): synthetic hand through the gesture machine
     CameraInput.ts         # getUserMedia + device selection + frame loop
     HandTracker.ts         # wraps the MediaPipe Hand Landmarker, returns HandFrame
     MouseInput.ts          # fallback provider (mouse) for development and testing
@@ -89,7 +91,7 @@ src/
     shootDetectors.ts      # ThumbDropDetector and RecoilDetector (same interface)
     gestureMachine.ts      # FSM: Idle → Gun → Shoot → Cooldown; emits events
     fixture.ts             # landmark recording format: parsing and replay helpers
-  debug/                   # metrics, debug overlay, camera preview, landmark renderer, fixture recorder
+  debug/                   # metrics, debug overlay, camera preview, landmark renderer, fixture recorder, synthetic hand
   game/
     scenes/                # Boot, Preload, Calibration, Menu, Game, GameOver, Settings
     entities/              # Duck, Crosshair, ...

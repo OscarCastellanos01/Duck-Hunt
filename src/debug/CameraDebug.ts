@@ -8,6 +8,8 @@ import { LandmarkRenderer } from '@/debug/LandmarkRenderer'
 import type { GestureState } from '@/gestures/gestureMachine'
 import { computePoseMetrics, createPoseMetrics } from '@/gestures/poseDetector'
 
+const SIMULATED_WIDTH = 640
+const SIMULATED_HEIGHT = 480
 const TOGGLE_DEBUG_KEY = 'd'
 const TOGGLE_PREVIEW_KEY = 'p'
 
@@ -18,6 +20,7 @@ export class CameraDebug {
   private readonly canvas = document.createElement('canvas')
   private readonly renderer: LandmarkRenderer
   private video: HTMLVideoElement | null = null
+  private attached = false
   private delegate = '-'
   private pose: Pose = 'none'
   private tracking = false
@@ -56,16 +59,19 @@ export class CameraDebug {
     this.applySettings()
   }
 
-  attach(video: HTMLVideoElement, delegate: string): void {
+  attach(video: HTMLVideoElement | null, delegate: string): void {
     this.video = video
+    this.attached = true
     this.delegate = delegate
-    this.previewBox.prepend(video)
+    if (video) this.previewBox.prepend(video)
+    else this.renderer.resize(SIMULATED_WIDTH, SIMULATED_HEIGHT)
     this.applySettings()
   }
 
   detach(): void {
     this.video?.remove()
     this.video = null
+    this.attached = false
     this.renderer.clear()
     this.pose = 'none'
     this.tracking = false
@@ -97,7 +103,7 @@ export class CameraDebug {
 
   private applySettings(): void {
     const { showPreview, showDebug, mirror } = this.settings.get()
-    this.previewBox.hidden = !(this.video && showPreview)
+    this.previewBox.hidden = !(this.attached && showPreview)
     this.previewBox.classList.toggle('mirrored', mirror)
     this.overlay.setVisible(showDebug)
   }

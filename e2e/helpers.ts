@@ -10,6 +10,7 @@ declare global {
     __duckGesture?: {
       activeScene: () => string | null
       inputMode: () => string | null
+      startScene: (key: string) => void
     }
   }
 }

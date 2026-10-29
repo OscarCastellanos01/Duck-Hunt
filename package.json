@@ -16,7 +16,8 @@
     "generate:sfx": "node scripts/generate-sfx.mjs",
     "e2e": "playwright test",
     "build:pages": "pnpm setup:mediapipe && pnpm build",
-    "generate:icons": "node scripts/generate-icons.mjs"
+    "generate:icons": "node scripts/generate-icons.mjs",
+    "capture:screenshots": "node scripts/capture-screenshots.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

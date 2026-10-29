@@ -3,7 +3,7 @@ import { DEFAULT_SETTINGS, POSE_THRESHOLDS } from '@/core/config'
 import { EventBus } from '@/core/eventBus'
 import type { AimEvent, GameEvents, HandFrame, ShootEvent } from '@/core/types'
 import { GestureMachine, type GestureSettings } from '@/gestures/gestureMachine'
-import { FRAME_INTERVAL_MS, makeHand, openHand } from '../helpers/handFactory'
+import { FRAME_INTERVAL_MS, makeHand, openHand } from '@/debug/syntheticHand'
 
 interface Recorded {
   shots: ShootEvent[]

@@ -17,8 +17,12 @@ import { SERVICES_KEY, type Services } from '@/game/services'
 import { GestureInput } from '@/input/GestureInput'
 import { InputController } from '@/input/InputController'
 import { MouseInput } from '@/input/MouseInput'
+import { SimulatedHandInput } from '@/input/SimulatedHandInput'
 
 const MUTE_KEY = 'm'
+const DEMO_FLAG = 'demo'
+const E2E_FLAG = 'e2e'
+const params = new URLSearchParams(window.location.search)
 
 const gameRoot = document.querySelector<HTMLDivElement>('#game')
 const overlayRoot = document.querySelector<HTMLDivElement>('#overlay')
@@ -32,7 +36,10 @@ const debug = new CameraDebug(overlayRoot, bus, settings)
 let canvas: HTMLCanvasElement | null = null
 const input = new InputController({
   mouse: () => new MouseInput(bus, () => canvas),
-  camera: () => new GestureInput(bus, settings, debug),
+  camera: () =>
+    params.has(DEMO_FLAG)
+      ? new SimulatedHandInput(bus, settings, debug)
+      : new GestureInput(bus, settings, debug),
 })
 const services: Services = { bus, settings, highScore, input }
 
@@ -69,11 +76,14 @@ window.addEventListener('keydown', (event) => {
   if (event.key.toLowerCase() === MUTE_KEY && !event.repeat) game.sound.mute = !game.sound.mute
 })
 
-if (new URLSearchParams(window.location.search).has('e2e')) {
+if (params.has(E2E_FLAG)) {
   Object.assign(window, {
     __duckGesture: {
       activeScene: () => game.scene.getScenes(true)[0]?.scene.key ?? null,
       inputMode: () => input.mode,
+      startScene: (key: string) => {
+        game.scene.getScenes(true)[0]?.scene.start(key)
+      },
     },
   })
 }

@@ -7,7 +7,7 @@ import {
   type ShootDetector,
   ThumbDropDetector,
 } from '@/gestures/shootDetectors'
-import { FRAME_INTERVAL_MS, makeHand } from '../helpers/handFactory'
+import { FRAME_INTERVAL_MS, makeHand } from '@/debug/syntheticHand'
 
 const run = (
   detector: ShootDetector,
