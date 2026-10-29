@@ -57,6 +57,7 @@ pnpm typecheck       # tsc --noEmit
 pnpm lint
 pnpm test            # vitest
 pnpm e2e             # playwright
+pnpm generate:sfx    # regenerates public/audio/*.wav with jsfxr
 pnpm setup:mediapipe # copies the tasks-vision .wasm files to public/mediapipe/wasm and downloads the model
 ```
 
@@ -96,6 +97,7 @@ src/
     manifest.ts            # single place that maps logical names → files
 scripts/
   setup-mediapipe.mjs      # copies the WASM runtime and downloads the model
+  generate-sfx.mjs         # generates the sound effects with jsfxr into public/audio
 public/
   assets/                  # sprites, audio (freely licensed only)
   mediapipe/wasm/          # MediaPipe runtime served from our own domain

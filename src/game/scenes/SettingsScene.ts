@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { COOLDOWN_RANGE_MS, GAME_CONFIG, SENSITIVITY_RANGE } from '@/core/config'
+import { COOLDOWN_RANGE_MS, GAME_CONFIG, SENSITIVITY_RANGE, VOLUME_RANGE } from '@/core/config'
 import type { GestureMode, Settings, SmoothingPreset } from '@/core/types'
 import { Crosshair } from '@/game/entities/Crosshair'
 import { CameraInput } from '@/input/CameraInput'
@@ -15,9 +15,9 @@ const VALUE_X = 740
 const PLUS_X = 840
 const CYCLE_BUTTON_WIDTH = 240
 const STEP_BUTTON_WIDTH = 56
-const ROW_HEIGHT = 40
-const ROW_SPACING = 42
-const FIRST_ROW_Y = 115
+const ROW_HEIGHT = 34
+const ROW_SPACING = 38
+const FIRST_ROW_Y = 108
 const BACK_Y = 490
 const CAMERA_LABEL_MAX_LENGTH = 16
 const SENSITIVITY_STEP = 0.1
@@ -119,6 +119,15 @@ export class SettingsScene extends Phaser.Scene {
       'Aim smoothing',
       () => SMOOTHING_LABELS[settings.get().smoothingPreset],
       () => settings.applyPreset(nextOf(SMOOTHING_PRESETS, settings.get().smoothingPreset)),
+    )
+    this.addStepper(
+      'Effects volume',
+      () => settings.get().sfxVolume,
+      (sfxVolume) => settings.update({ sfxVolume }),
+      SENSITIVITY_STEP,
+      VOLUME_RANGE.min,
+      VOLUME_RANGE.max,
+      (value) => `${Math.round(value * 100)}%`,
     )
     this.addCycle(
       'Camera',

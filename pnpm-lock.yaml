@@ -33,6 +33,9 @@ importers:
       globals:
         specifier: ^17.13.0
         version: 17.13.0
+      jsfxr:
+        specifier: ^1.4.1
+        version: 1.4.1
       prettier:
         specifier: ^3.9.10
         version: 3.9.10
@@ -530,6 +533,10 @@ packages:
 
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
+
+  jsfxr@1.4.1:
+    resolution: {integrity: sha512-Xbamo2dpLF5B+ssyv6TUEIoHJ/KRt4SRK2J3JOOmUG+45XBjkGKTjR/KOyQ9sqjrx/uea/UTWI0+p5pOVm1bUw==}
+    hasBin: true
 
   json-schema-traverse@0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
@@ -1299,6 +1306,8 @@ snapshots:
       is-extglob: 2.1.1
 
   isexe@2.0.0: {}
+
+  jsfxr@1.4.1: {}
 
   json-schema-traverse@0.4.1: {}
 

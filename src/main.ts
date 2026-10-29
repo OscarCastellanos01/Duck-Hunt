@@ -18,6 +18,8 @@ import { GestureInput } from '@/input/GestureInput'
 import { InputController } from '@/input/InputController'
 import { MouseInput } from '@/input/MouseInput'
 
+const MUTE_KEY = 'm'
+
 const gameRoot = document.querySelector<HTMLDivElement>('#game')
 const overlayRoot = document.querySelector<HTMLDivElement>('#overlay')
 if (!gameRoot || !overlayRoot) throw new Error('Missing #game or #overlay container')
@@ -57,6 +59,14 @@ const game = new Phaser.Game({
       void input.use('mouse')
     },
   },
+})
+
+game.sound.volume = settings.get().sfxVolume
+settings.subscribe((next) => {
+  game.sound.volume = next.sfxVolume
+})
+window.addEventListener('keydown', (event) => {
+  if (event.key.toLowerCase() === MUTE_KEY && !event.repeat) game.sound.mute = !game.sound.mute
 })
 
 window.addEventListener('beforeunload', () => {

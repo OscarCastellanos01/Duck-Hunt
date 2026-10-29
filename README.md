@@ -45,14 +45,15 @@ pnpm dev
 
 `localhost` is allowed to use the camera without HTTPS. Other scripts:
 
-| Command          | Description                    |
-| ---------------- | ------------------------------ |
-| `pnpm build`     | Typecheck and production build |
-| `pnpm preview`   | Preview the production build   |
-| `pnpm typecheck` | Run `tsc --noEmit`             |
-| `pnpm lint`      | Run ESLint                     |
-| `pnpm format`    | Run Prettier                   |
-| `pnpm test`      | Run unit tests with Vitest     |
+| Command             | Description                                    |
+| ------------------- | ---------------------------------------------- |
+| `pnpm build`        | Typecheck and production build                 |
+| `pnpm preview`      | Preview the production build                   |
+| `pnpm typecheck`    | Run `tsc --noEmit`                             |
+| `pnpm lint`         | Run ESLint                                     |
+| `pnpm format`       | Run Prettier                                   |
+| `pnpm test`         | Run unit tests with Vitest                     |
+| `pnpm generate:sfx` | Regenerate the sound effects in `public/audio` |
 
 ## Privacy
 

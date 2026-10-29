@@ -30,9 +30,17 @@ export const normalizePointer = (
 }
 
 const PRIMARY_BUTTON = 0
+const KEY_AIM_STEP = 0.03
+const SHOOT_KEYS = new Set([' ', 'Enter'])
+const AIM_KEY_DELTAS: Record<string, readonly [number, number]> = {
+  ArrowLeft: [-KEY_AIM_STEP, 0],
+  ArrowRight: [KEY_AIM_STEP, 0],
+  ArrowUp: [0, -KEY_AIM_STEP],
+  ArrowDown: [0, KEY_AIM_STEP],
+}
 
 export class MouseInput implements InputProvider {
-  private readonly aimEvent: AimEvent = { x: 0, y: 0, t: 0 }
+  private readonly aimEvent: AimEvent = { x: 0.5, y: 0.5, t: 0 }
 
   constructor(
     private readonly bus: EventBus<GameEvents>,
@@ -42,11 +50,13 @@ export class MouseInput implements InputProvider {
   async start(): Promise<void> {
     window.addEventListener('pointermove', this.onMove)
     window.addEventListener('pointerdown', this.onDown)
+    window.addEventListener('keydown', this.onKey)
   }
 
   stop(): void {
     window.removeEventListener('pointermove', this.onMove)
     window.removeEventListener('pointerdown', this.onDown)
+    window.removeEventListener('keydown', this.onKey)
   }
 
   private resolve(event: PointerEvent): NormalizedPointer | null {
@@ -62,6 +72,20 @@ export class MouseInput implements InputProvider {
     this.aimEvent.y = pointer.y
     this.aimEvent.t = performance.now()
     this.bus.emit('aim', this.aimEvent)
+  }
+
+  private readonly onKey = (event: KeyboardEvent): void => {
+    const delta = AIM_KEY_DELTAS[event.key]
+    if (delta) {
+      event.preventDefault()
+      this.aimEvent.x = Math.min(1, Math.max(0, this.aimEvent.x + delta[0]))
+      this.aimEvent.y = Math.min(1, Math.max(0, this.aimEvent.y + delta[1]))
+      this.aimEvent.t = performance.now()
+      this.bus.emit('aim', this.aimEvent)
+    } else if (SHOOT_KEYS.has(event.key) && !event.repeat) {
+      event.preventDefault()
+      this.bus.emit('shoot', { x: this.aimEvent.x, y: this.aimEvent.y, t: performance.now() })
+    }
   }
 
   private readonly onDown = (event: PointerEvent): void => {

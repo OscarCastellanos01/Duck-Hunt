@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { GAME_CONFIG } from '@/core/config'
+import { FX_CONFIG, GAME_CONFIG } from '@/core/config'
 import { Crosshair } from '@/game/entities/Crosshair'
 import { SCENE_KEYS } from '@/game/scenes/keys'
 import { getServices, type Services } from '@/game/services'
@@ -31,6 +31,7 @@ const INTRO_TEXT = [
   'Tip: use a well lit room and keep your hand inside the frame.',
 ].join('\n')
 
+const LIGHT_HINT = 'Make sure the room is well lit.'
 const READY_HINT = 'Point with your index finger to aim and drop your thumb to shoot the target.'
 
 export class CalibrationScene extends Phaser.Scene {
@@ -44,6 +45,7 @@ export class CalibrationScene extends Phaser.Scene {
   private enableButton!: Button
   private startButton!: Button
   private lastAimAt = Number.NEGATIVE_INFINITY
+  private lastDetectedAt = 0
   private shots = 0
   private hits = 0
 
@@ -56,6 +58,7 @@ export class CalibrationScene extends Phaser.Scene {
     this.shots = 0
     this.hits = 0
     this.lastAimAt = Number.NEGATIVE_INFINITY
+    this.lastDetectedAt = performance.now()
     const centerX = GAME_CONFIG.width / 2
     const style = {
       fontFamily: FONT,
@@ -145,7 +148,12 @@ export class CalibrationScene extends Phaser.Scene {
   override update(time: number): void {
     if (this.step !== 'ready') return
     const detected = time - this.lastAimAt < HAND_TIMEOUT_MS
-    this.handStatus.setText(detected ? 'Hand: detected' : 'Hand: show your hand to the camera')
+    if (detected) this.lastDetectedAt = time
+    const lost = !detected && time - this.lastDetectedAt > FX_CONFIG.lightHintDelayMs
+    const waiting = lost
+      ? `Hand: show your hand to the camera\n${LIGHT_HINT}`
+      : 'Hand: show your hand to the camera'
+    this.handStatus.setText(detected ? 'Hand: detected' : waiting)
     this.handStatus.setColor(detected ? '#6fe37a' : '#ffd23f')
   }
 

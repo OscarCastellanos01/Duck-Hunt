@@ -79,7 +79,7 @@ export class MenuScene extends Phaser.Scene {
       .text(
         centerX,
         425,
-        'Point with your index finger to aim. Drop your thumb to shoot.\nCamera video is processed on this device only. Nothing is recorded or uploaded.',
+        'Point with your index finger to aim. Drop your thumb to shoot.\nCamera video is processed on this device only. Nothing is recorded or uploaded.\nMouse mode also works with the arrow keys and Space. Press M to mute.',
         {
           fontFamily: FONT,
           fontSize: '18px',

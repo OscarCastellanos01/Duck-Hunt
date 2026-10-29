@@ -17,6 +17,7 @@ export class GameOverScene extends Phaser.Scene {
 
   create(data: GameOverData): void {
     const services = getServices(this)
+    if (data.newRecord) this.sound.play('record')
     const centerX = GAME_CONFIG.width / 2
     const style = { fontFamily: FONT, color: '#ffffff', stroke: '#000000', strokeThickness: 6 }
     createBackdrop(this)

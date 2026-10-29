@@ -1,8 +1,9 @@
 import Phaser from 'phaser'
-import { GAME_CONFIG, TRACKING_FREEZE_MS } from '@/core/config'
+import { FX_CONFIG, GAME_CONFIG, TRACKING_FREEZE_MS } from '@/core/config'
 import { Crosshair } from '@/game/entities/Crosshair'
 import { createBackdrop } from '@/game/ui/Backdrop'
 import { Duck } from '@/game/entities/Duck'
+import { confettiEffect, duckHitEffect, missEffect } from '@/game/effects'
 import { SCENE_KEYS, type GameOverData } from '@/game/scenes/keys'
 import { getServices, type Services } from '@/game/services'
 import { Ammo } from '@/game/systems/ammo'
@@ -15,6 +16,8 @@ import { Hud, type DuckResult } from '@/game/ui/Hud'
 type Phase = 'intro' | 'wave' | 'between' | 'over'
 
 const FONT = 'system-ui, sans-serif'
+const NOTICE_TEXT = 'Hand lost. Show your hand to the camera.'
+const LIGHT_HINT = 'Make sure the room is well lit.'
 const DUCK_DEPTH = 10
 const FLASH_DEPTH = 900
 const FLOATING_TEXT_DEPTH = 800
@@ -28,7 +31,7 @@ export class GameScene extends Phaser.Scene {
   private hud!: Hud
   private flash!: Phaser.GameObjects.Rectangle
   private notice!: Phaser.GameObjects.Text
-  private noticeTimer: Phaser.Time.TimerEvent | null = null
+  private noticeTimers: Phaser.Time.TimerEvent[] = []
   private ducks: Duck[] = []
   private resultIndex = new Map<Duck, number>()
   private results: DuckResult[] = []
@@ -68,18 +71,13 @@ export class GameScene extends Phaser.Scene {
     this.hud.setScore(0)
     this.hud.setStreak(1)
     this.notice = this.add
-      .text(
-        GAME_CONFIG.width / 2,
-        GAME_CONFIG.height - 110,
-        'Hand lost. Show your hand to the camera.',
-        {
-          fontFamily: FONT,
-          fontSize: '26px',
-          color: '#ffd23f',
-          stroke: '#000000',
-          strokeThickness: 5,
-        },
-      )
+      .text(GAME_CONFIG.width / 2, GAME_CONFIG.height - 110, NOTICE_TEXT, {
+        fontFamily: FONT,
+        fontSize: '26px',
+        color: '#ffd23f',
+        stroke: '#000000',
+        strokeThickness: 5,
+      })
       .setOrigin(0.5)
       .setDepth(FLASH_DEPTH)
       .setVisible(false)
@@ -88,13 +86,17 @@ export class GameScene extends Phaser.Scene {
     const { bus } = this.services
     const offShoot = bus.on('shoot', ({ x, y }) => this.handleShoot(x, y))
     const offLost = bus.on('trackingLost', () => {
-      this.noticeTimer?.remove()
-      this.noticeTimer = this.time.delayedCall(TRACKING_FREEZE_MS, () =>
-        this.notice.setVisible(true),
-      )
+      this.clearNoticeTimers()
+      this.notice.setText(NOTICE_TEXT)
+      this.noticeTimers = [
+        this.time.delayedCall(TRACKING_FREEZE_MS, () => this.notice.setVisible(true)),
+        this.time.delayedCall(FX_CONFIG.lightHintDelayMs, () =>
+          this.notice.setText(`${NOTICE_TEXT}\n${LIGHT_HINT}`),
+        ),
+      ]
     })
     const offFound = bus.on('trackingFound', () => {
-      this.noticeTimer?.remove()
+      this.clearNoticeTimers()
       this.notice.setVisible(false)
     })
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -122,6 +124,11 @@ export class GameScene extends Phaser.Scene {
     if (this.pendingSpawns === 0 && this.flyingDucks().length === 0) this.endWave()
   }
 
+  private clearNoticeTimers(): void {
+    for (const timer of this.noticeTimers) timer.remove()
+    this.noticeTimers = []
+  }
+
   private flyingDucks(): Duck[] {
     return this.ducks.filter((duck) => duck.isFlying)
   }
@@ -140,6 +147,7 @@ export class GameScene extends Phaser.Scene {
     const difficulty = this.rounds.difficulty
     this.phase = 'wave'
     this.ammo.reload()
+    this.sound.play('reload')
     this.hud.setAmmo(this.ammo.remaining)
     this.hud.setRound(this.rounds.round, this.rounds.wave, GAME_CONFIG.wavesPerRound)
     this.waveHits = 0
@@ -176,7 +184,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleShoot(nx: number, ny: number): void {
-    if (this.phase !== 'wave' || !this.ammo.consume()) return
+    if (this.phase !== 'wave') return
+    if (!this.ammo.consume()) {
+      this.sound.play('empty')
+      return
+    }
+    this.sound.play('shoot')
     this.hud.setAmmo(this.ammo.remaining)
     this.shotFeedback()
 
@@ -188,6 +201,8 @@ export class GameScene extends Phaser.Scene {
     const duck = flying[index]
     if (duck) {
       duck.hit()
+      this.sound.play(duck.duckType === 'golden' ? 'hitGolden' : 'hit')
+      duckHitEffect(this, duck.x, duck.y, duck.duckType)
       const points = this.scoring.registerHit(duck.points)
       this.waveHits += 1
       this.markResult(duck, 'hit')
@@ -196,6 +211,7 @@ export class GameScene extends Phaser.Scene {
       this.hud.setHighScore(Math.max(this.services.highScore.get(), this.scoring.score))
     } else {
       this.scoring.registerMiss()
+      missEffect(this, x, y)
     }
     this.hud.setStreak(this.scoring.multiplier)
   }
@@ -229,7 +245,10 @@ export class GameScene extends Phaser.Scene {
 
   private endWave(): void {
     this.phase = 'between'
+    const perfect = this.waveHits === this.rounds.difficulty.ducksPerWave
     const outcome = this.rounds.finishWave(this.waveHits)
+    if (perfect && outcome === 'next-wave')
+      this.hud.showBanner('Perfect!', FX_CONFIG.perfectBannerMs)
     this.time.delayedCall(GAME_CONFIG.waveEndMs, () => this.advance(outcome))
   }
 
@@ -239,6 +258,8 @@ export class GameScene extends Phaser.Scene {
       return
     }
     if (outcome === 'round-cleared') {
+      this.sound.play('roundClear')
+      confettiEffect(this, GAME_CONFIG.width / 2, GAME_CONFIG.height / 2)
       this.scoring.addBonus(GAME_CONFIG.roundClearBonus)
       this.hud.setScore(this.scoring.score)
       this.hud.showBanner(`Round cleared! +${GAME_CONFIG.roundClearBonus}`, GAME_CONFIG.introMs)
@@ -249,6 +270,7 @@ export class GameScene extends Phaser.Scene {
       return
     }
     this.phase = 'over'
+    this.sound.play('gameOver')
     this.hud.showBanner('Too many ducks escaped', GAME_CONFIG.introMs)
     this.time.delayedCall(GAME_CONFIG.introMs, () => this.finish())
   }

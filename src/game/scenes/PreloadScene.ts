@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
-import { ASSET_MANIFEST, IMAGE_KEYS } from '@/assets/manifest'
+import { ASSET_MANIFEST, AUDIO_KEYS, IMAGE_KEYS } from '@/assets/manifest'
 import { GAME_CONFIG } from '@/core/config'
+import { generateFxTextures } from '@/game/effects'
 import { SCENE_KEYS } from '@/game/scenes/keys'
 
 const BAR_WIDTH = 400
@@ -20,8 +21,8 @@ export class PreloadScene extends Phaser.Scene {
     const bar = this.add
       .rectangle(centerX - BAR_WIDTH / 2, centerY, 0, BAR_HEIGHT, 0x6fe37a)
       .setOrigin(0, 0.5)
-    this.add
-      .text(centerX, centerY - 48, 'Loading...', {
+    const label = this.add
+      .text(centerX, centerY - 48, 'Loading... 0%', {
         fontFamily: 'system-ui, sans-serif',
         fontSize: '28px',
         color: '#ffffff',
@@ -29,14 +30,17 @@ export class PreloadScene extends Phaser.Scene {
       .setOrigin(0.5)
     this.load.on(Phaser.Loader.Events.PROGRESS, (value: number) => {
       bar.width = BAR_WIDTH * value
+      label.setText(`Loading... ${Math.round(value * 100)}%`)
     })
     for (const key of IMAGE_KEYS) {
       const path = ASSET_MANIFEST.images[key]
       this.load.image(key, path)
     }
+    for (const key of AUDIO_KEYS) this.load.audio(key, ASSET_MANIFEST.audio[key])
   }
 
   create(): void {
+    generateFxTextures(this)
     this.scene.start(SCENE_KEYS.menu)
   }
 }

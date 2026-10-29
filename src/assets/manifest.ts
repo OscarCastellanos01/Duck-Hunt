@@ -15,8 +15,20 @@ export type ImageKey =
   | 'bulletEmptyIcon'
   | 'duckIcon'
 
+export type AudioKey =
+  | 'shoot'
+  | 'empty'
+  | 'hit'
+  | 'hitGolden'
+  | 'reload'
+  | 'roundClear'
+  | 'gameOver'
+  | 'select'
+  | 'record'
+
 export interface AssetManifest {
   images: Record<ImageKey, string>
+  audio: Record<AudioKey, string>
 }
 
 const baseManifest: AssetManifest = {
@@ -37,18 +49,35 @@ const baseManifest: AssetManifest = {
     bulletEmptyIcon: '/assets/PNG/HUD/icon_bullet_empty_short.png',
     duckIcon: '/assets/PNG/HUD/icon_duck.png',
   },
+  audio: {
+    shoot: '/audio/shoot.wav',
+    empty: '/audio/empty.wav',
+    hit: '/audio/hit.wav',
+    hitGolden: '/audio/hitGolden.wav',
+    reload: '/audio/reload.wav',
+    roundClear: '/audio/roundClear.wav',
+    gameOver: '/audio/gameOver.wav',
+    select: '/audio/select.wav',
+    record: '/audio/record.wav',
+  },
 }
 
-const localOverrides = import.meta.glob<{ default: Partial<AssetManifest['images']> }>(
-  './manifest.local.ts',
-  { eager: true },
-)
+interface ManifestOverride {
+  images?: Partial<AssetManifest['images']>
+  audio?: Partial<AssetManifest['audio']>
+}
 
-const merged = Object.values(localOverrides).reduce<AssetManifest['images']>(
-  (images, module) => ({ ...images, ...module.default }),
-  baseManifest.images,
-)
+const localOverrides = import.meta.glob<{ default: ManifestOverride }>('./manifest.local.ts', {
+  eager: true,
+})
 
-export const ASSET_MANIFEST: AssetManifest = { images: merged }
+export const ASSET_MANIFEST: AssetManifest = Object.values(localOverrides).reduce<AssetManifest>(
+  (manifest, module) => ({
+    images: { ...manifest.images, ...module.default.images },
+    audio: { ...manifest.audio, ...module.default.audio },
+  }),
+  baseManifest,
+)
 
 export const IMAGE_KEYS = Object.keys(ASSET_MANIFEST.images) as ImageKey[]
+export const AUDIO_KEYS = Object.keys(ASSET_MANIFEST.audio) as AudioKey[]

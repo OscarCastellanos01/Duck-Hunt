@@ -144,3 +144,29 @@ export const DIFFICULTY_CONFIG = {
   launchAngleMaxRad: 0.6,
   escapeSpeed: 420,
 }
+
+export const DUCK_ANIMATION = {
+  flapRate: 16,
+  flapSquash: 0.08,
+  flapStretch: 0.04,
+  escapeFlapMultiplier: 1.6,
+  tiltMaxDeg: 22,
+  tiltFactor: 0.4,
+  tiltSmoothing: 0.15,
+  escapeTiltDeg: -25,
+  stunMs: 180,
+  stunScale: 1.2,
+  stunTint: 0xff7070,
+}
+
+export const FX_CONFIG = {
+  feathersPerHit: 14,
+  goldenExtraSparks: 10,
+  dustPerMiss: 6,
+  confettiCount: 24,
+  particleLifespanMs: 700,
+  perfectBannerMs: 900,
+  lightHintDelayMs: 3000,
+  featherTints: { common: 0x8b5a2b, fast: 0xffffff, golden: 0xffd23f },
+  confettiTints: [0xff5252, 0xffd23f, 0x6fe37a, 0x4aa3ff, 0xffffff],
+}

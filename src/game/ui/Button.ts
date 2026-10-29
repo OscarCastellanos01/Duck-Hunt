@@ -50,6 +50,7 @@ export class Button extends Phaser.GameObjects.Container {
   }
 
   activate(): void {
+    this.scene.sound.play('select')
     this.onActivate()
   }
 }
