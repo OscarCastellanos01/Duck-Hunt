@@ -5,6 +5,7 @@ export const SCENE_KEYS = {
   game: 'Game',
   gameOver: 'GameOver',
   settings: 'Settings',
+  calibration: 'Calibration',
 } as const
 
 export interface GameOverData {

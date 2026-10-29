@@ -39,6 +39,7 @@ export class Button extends Phaser.GameObjects.Container {
 
   containsPoint(px: number, py: number): boolean {
     return (
+      this.visible &&
       Math.abs(px - this.x) <= this.buttonWidth / 2 &&
       Math.abs(py - this.y) <= this.buttonHeight / 2
     )

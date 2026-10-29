@@ -7,6 +7,7 @@ import { SettingsStore } from '@/core/settings'
 import type { GameEvents } from '@/core/types'
 import { CameraDebug } from '@/debug/CameraDebug'
 import { BootScene } from '@/game/scenes/BootScene'
+import { CalibrationScene } from '@/game/scenes/CalibrationScene'
 import { GameOverScene } from '@/game/scenes/GameOverScene'
 import { GameScene } from '@/game/scenes/GameScene'
 import { MenuScene } from '@/game/scenes/MenuScene'
@@ -40,7 +41,15 @@ const game = new Phaser.Game({
   height: GAME_CONFIG.height,
   backgroundColor: '#000000',
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [BootScene, PreloadScene, MenuScene, GameScene, GameOverScene, SettingsScene],
+  scene: [
+    BootScene,
+    PreloadScene,
+    MenuScene,
+    GameScene,
+    GameOverScene,
+    SettingsScene,
+    CalibrationScene,
+  ],
   callbacks: {
     preBoot: (instance) => instance.registry.set(SERVICES_KEY, services),
     postBoot: (instance) => {

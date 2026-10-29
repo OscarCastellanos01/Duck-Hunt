@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { COOLDOWN_RANGE_MS, GAME_CONFIG, SENSITIVITY_RANGE } from '@/core/config'
 import type { GestureMode, Settings, SmoothingPreset } from '@/core/types'
 import { Crosshair } from '@/game/entities/Crosshair'
+import { CameraInput } from '@/input/CameraInput'
 import { SCENE_KEYS } from '@/game/scenes/keys'
 import { getServices, type Services } from '@/game/services'
 import { UI_DEPTH, createBackdrop } from '@/game/ui/Backdrop'
@@ -15,9 +16,10 @@ const PLUS_X = 840
 const CYCLE_BUTTON_WIDTH = 240
 const STEP_BUTTON_WIDTH = 56
 const ROW_HEIGHT = 40
-const ROW_SPACING = 46
-const FIRST_ROW_Y = 125
+const ROW_SPACING = 42
+const FIRST_ROW_Y = 115
 const BACK_Y = 490
+const CAMERA_LABEL_MAX_LENGTH = 16
 const SENSITIVITY_STEP = 0.1
 const COOLDOWN_STEP_MS = 50
 
@@ -52,6 +54,7 @@ export class SettingsScene extends Phaser.Scene {
   private buttons!: ButtonGroup
   private refreshers: (() => void)[] = []
   private rowIndex = 0
+  private devices: MediaDeviceInfo[] = []
 
   constructor() {
     super(SCENE_KEYS.settings)
@@ -61,6 +64,7 @@ export class SettingsScene extends Phaser.Scene {
     this.services = getServices(this)
     this.refreshers = []
     this.rowIndex = 0
+    this.devices = []
     const centerX = GAME_CONFIG.width / 2
     const { settings } = this.services
 
@@ -116,6 +120,11 @@ export class SettingsScene extends Phaser.Scene {
       () => SMOOTHING_LABELS[settings.get().smoothingPreset],
       () => settings.applyPreset(nextOf(SMOOTHING_PRESETS, settings.get().smoothingPreset)),
     )
+    this.addCycle(
+      'Camera',
+      () => this.cameraLabel(),
+      () => this.nextCamera(),
+    )
     this.addToggle('Mirror image', 'mirror')
     this.addToggle('Camera preview', 'showPreview')
     this.addToggle('Debug overlay', 'showDebug')
@@ -128,6 +137,33 @@ export class SettingsScene extends Phaser.Scene {
     const off = settings.subscribe(() => this.refresh())
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, off)
     this.refresh()
+    void this.loadDevices()
+  }
+
+  private async loadDevices(): Promise<void> {
+    try {
+      this.devices = await CameraInput.listDevices()
+    } catch {
+      this.devices = []
+    }
+    this.refresh()
+  }
+
+  private cameraLabel(): string {
+    const id = this.services.settings.get().cameraId
+    if (!id) return 'Default'
+    const index = this.devices.findIndex((device) => device.deviceId === id)
+    if (index < 0) return 'Default'
+    const label = this.devices[index]?.label
+    return label ? label.slice(0, CAMERA_LABEL_MAX_LENGTH) : `Camera ${index + 1}`
+  }
+
+  private nextCamera(): void {
+    const options: (string | null)[] = [null, ...this.devices.map((device) => device.deviceId)]
+    const current = this.services.settings.get().cameraId
+    this.services.settings.update({
+      cameraId: nextOf(options, options.includes(current) ? current : null),
+    })
   }
 
   private nextRowY(): number {

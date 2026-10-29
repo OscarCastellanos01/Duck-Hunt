@@ -79,7 +79,7 @@ export class MenuScene extends Phaser.Scene {
       .text(
         centerX,
         425,
-        'Shape your hand like a pistol to aim. Drop your thumb to shoot.\nCamera video is processed on this device only. Nothing is recorded or uploaded.',
+        'Point with your index finger to aim. Drop your thumb to shoot.\nCamera video is processed on this device only. Nothing is recorded or uploaded.',
         {
           fontFamily: FONT,
           fontSize: '18px',
@@ -108,8 +108,11 @@ export class MenuScene extends Phaser.Scene {
 
   private async play(mode: InputMode): Promise<void> {
     if (this.busy) return
+    if (mode === 'camera') {
+      this.scene.start(SCENE_KEYS.calibration)
+      return
+    }
     this.busy = true
-    this.status.setText(mode === 'camera' ? 'Starting camera and loading hand tracking...' : '')
     try {
       await this.services.input.use(mode)
     } catch (error) {

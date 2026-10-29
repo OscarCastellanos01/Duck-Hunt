@@ -62,15 +62,7 @@ export class CameraInput implements InputProvider {
     if (this.running) return
     if (!navigator.mediaDevices?.getUserMedia) throw new CameraError('insecure')
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: {
-          deviceId: this.deviceId ? { exact: this.deviceId } : undefined,
-          width: { ideal: CAMERA_CONSTRAINTS.width },
-          height: { ideal: CAMERA_CONSTRAINTS.height },
-          frameRate: { ideal: CAMERA_CONSTRAINTS.frameRate },
-        },
-      })
+      this.stream = await this.openStream()
       this.video.srcObject = this.stream
       await this.video.play()
     } catch (error) {
@@ -80,6 +72,27 @@ export class CameraInput implements InputProvider {
     this.running = true
     this.lastVideoTime = -1
     this.schedule()
+  }
+
+  private async openStream(): Promise<MediaStream> {
+    const open = (deviceId: string | null) =>
+      navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          deviceId: deviceId ? { exact: deviceId } : undefined,
+          width: { ideal: CAMERA_CONSTRAINTS.width },
+          height: { ideal: CAMERA_CONSTRAINTS.height },
+          frameRate: { ideal: CAMERA_CONSTRAINTS.frameRate },
+        },
+      })
+    try {
+      return await open(this.deviceId)
+    } catch (error) {
+      if (this.deviceId && error instanceof DOMException && error.name === 'OverconstrainedError') {
+        return open(null)
+      }
+      throw error
+    }
   }
 
   stop(): void {

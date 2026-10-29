@@ -18,6 +18,7 @@ export class GestureInput implements InputProvider {
   private tracker: HandTracker | null = null
   private camera: CameraInput | null = null
   private unsubscribe: (() => void) | null = null
+  private activeDeviceId: string | null = null
 
   constructor(
     private readonly bus: EventBus<GameEvents>,
@@ -39,7 +40,11 @@ export class GestureInput implements InputProvider {
     )
     await camera.start()
     this.camera = camera
-    this.unsubscribe = this.settings.subscribe((next) => machine.configure(next))
+    this.activeDeviceId = this.settings.get().cameraId
+    this.unsubscribe = this.settings.subscribe((next) => {
+      machine.configure(next)
+      if (next.cameraId !== this.activeDeviceId) void this.switchCamera(camera, next.cameraId)
+    })
     this.debug.attach(camera.video, this.tracker.delegate)
   }
 
@@ -51,6 +56,18 @@ export class GestureInput implements InputProvider {
     this.unsubscribe = null
     this.camera = null
     this.tracker = null
+  }
+
+  private async switchCamera(camera: CameraInput, deviceId: string | null): Promise<void> {
+    this.activeDeviceId = deviceId
+    camera.stop()
+    camera.setDevice(deviceId)
+    try {
+      await camera.start()
+    } catch {
+      camera.setDevice(null)
+      await camera.start().catch(() => undefined)
+    }
   }
 
   private onFrame(machine: GestureMachine, frame: HandFrame | null, timing: FrameTiming): void {
