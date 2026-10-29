@@ -64,14 +64,14 @@ describe('GestureMachine', () => {
 
   it('shoots on thumb drop and enters cooldown', () => {
     enterGun(ctx.push)
-    ctx.push(makeHand({ thumbDrop: 1 }))
+    ctx.push(makeHand({ thumbDrop: 1 }), 4)
     expect(ctx.recorded.shots).toHaveLength(1)
     expect(ctx.machine.state).toBe('cooldown')
   })
 
   it('returns to gun after the cooldown if the pose persists', () => {
     enterGun(ctx.push)
-    ctx.push(makeHand({ thumbDrop: 1 }))
+    ctx.push(makeHand({ thumbDrop: 1 }), 4)
     const frames = Math.ceil(DEFAULT_SETTINGS.cooldownMs / FRAME_INTERVAL_MS) + 1
     ctx.push(makeHand({ thumbDrop: 1 }), frames)
     expect(ctx.machine.state).toBe('gun')
@@ -79,7 +79,7 @@ describe('GestureMachine', () => {
 
   it('blocks a second shot during the cooldown', () => {
     enterGun(ctx.push)
-    ctx.push(makeHand({ thumbDrop: 1 }))
+    ctx.push(makeHand({ thumbDrop: 1 }), 4)
     ctx.push(makeHand(), 3)
     ctx.push(makeHand({ thumbDrop: 1 }), 2)
     expect(ctx.recorded.shots).toHaveLength(1)
@@ -87,9 +87,9 @@ describe('GestureMachine', () => {
 
   it('allows another shot once the cooldown expires and the thumb is rearmed', () => {
     enterGun(ctx.push)
-    ctx.push(makeHand({ thumbDrop: 1 }))
+    ctx.push(makeHand({ thumbDrop: 1 }), 4)
     ctx.push(makeHand(), Math.ceil(DEFAULT_SETTINGS.cooldownMs / FRAME_INTERVAL_MS) + 2)
-    ctx.push(makeHand({ thumbDrop: 1 }), 2)
+    ctx.push(makeHand({ thumbDrop: 1 }), 4)
     expect(ctx.recorded.shots).toHaveLength(2)
   })
 
@@ -122,7 +122,7 @@ describe('GestureMachine', () => {
 
   it('shoots on thumb drop without the gun pose', () => {
     ctx.push(openHand(), 10)
-    ctx.push(openHand({ thumbDrop: 1 }), 2)
+    ctx.push(openHand({ thumbDrop: 1 }), 4)
     expect(ctx.recorded.shots).toHaveLength(1)
     expect(ctx.recorded.poses).toEqual([])
   })

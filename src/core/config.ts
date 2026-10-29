@@ -13,7 +13,7 @@ export const SMOOTHING_PRESETS: Record<SmoothingPreset, OneEuroParams> = {
 
 export const DEFAULT_SETTINGS: Settings = {
   gestureMode: 'thumb',
-  thumbSensitivity: 0.7,
+  thumbSensitivity: 0.6,
   recoilSensitivity: 0.5,
   cooldownMs: 250,
   smoothingPreset: 'balanced',
@@ -63,6 +63,8 @@ export const THUMB_THRESHOLDS = {
   dropMax: 0.5,
   windowMs: 500,
   rearmFraction: 0.5,
+  smoothing: 0.6,
+  confirmFrames: 2,
 }
 
 export const RECOIL_THRESHOLDS = {

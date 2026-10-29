@@ -33,16 +33,28 @@ describe('ThumbDropDetector', () => {
   })
 
   it('reports the aim position at the moment of the shot', () => {
-    const frames = thumbSequence([0, 0, 1, 1])
+    const frames = thumbSequence([0, 0, 1, 1, 1])
     const shots = run(new ThumbDropDetector(0.5), frames, (i) => ({ x: i / 10, y: 0.2 }))
     expect(shots).toHaveLength(1)
-    expect(shots[0]?.x).toBeCloseTo(0.2, 5)
-    expect(shots[0]?.t).toBe(2 * FRAME_INTERVAL_MS)
+    expect(shots[0]?.x).toBeCloseTo(0.3, 5)
+    expect(shots[0]?.t).toBe(3 * FRAME_INTERVAL_MS)
   })
 
   it('ignores a slow thumb movement', () => {
     const slow = thumbSequence(Array.from({ length: 120 }, (_, i) => i / 119))
     expect(run(new ThumbDropDetector(0.5), slow)).toHaveLength(0)
+  })
+
+  it('ignores a single-frame spike in the thumb landmark', () => {
+    const spike = thumbSequence([0, 0, 0, 1, 0, 0, 0, 0])
+    expect(run(new ThumbDropDetector(0.5), spike)).toHaveLength(0)
+  })
+
+  it('does not fire from landmark noise with the thumb held up', () => {
+    const frames = Array.from({ length: 300 }, (_, i) =>
+      makeHand({ noise: 0.05, t: i * FRAME_INTERVAL_MS }),
+    )
+    expect(run(new ThumbDropDetector(0.7), frames)).toHaveLength(0)
   })
 
   it('does not fire if the thumb starts down', () => {
@@ -51,7 +63,7 @@ describe('ThumbDropDetector', () => {
 
   it('needs the thumb to rise again to rearm', () => {
     const detector = new ThumbDropDetector(0.5)
-    const frames = thumbSequence([0, 1, 1, 0.9, 1, 0, 0, 1])
+    const frames = thumbSequence([0, 1, 1, 0.9, 1, 0, 0, 0, 1, 1, 1])
     expect(run(detector, frames)).toHaveLength(2)
   })
 

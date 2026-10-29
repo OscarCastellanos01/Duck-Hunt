@@ -26,6 +26,8 @@ export class ThumbDropDetector implements ShootDetector {
   private count = 0
   private armed = true
   private trough = 0
+  private smoothed = 0
+  private streak = 0
   private readonly requiredDrop: number
 
   constructor(sensitivity: number) {
@@ -36,11 +38,15 @@ export class ThumbDropDetector implements ShootDetector {
     this.head = 0
     this.count = 0
     this.armed = true
+    this.streak = 0
   }
 
   update(sample: GestureSample, out: ShootEvent): boolean {
-    const spread = thumbSpread(sample.frame)
+    const raw = thumbSpread(sample.frame)
     const now = sample.frame.t
+    const spread =
+      this.count === 0 ? raw : this.smoothed + THUMB_THRESHOLDS.smoothing * (raw - this.smoothed)
+    this.smoothed = spread
     this.push(now, spread)
     if (!this.armed) {
       this.trough = Math.min(this.trough, spread)
@@ -48,7 +54,13 @@ export class ThumbDropDetector implements ShootDetector {
       if (spread >= rearmAt) this.armed = true
       return false
     }
-    if (this.recentPeak(now) - spread < this.requiredDrop) return false
+    if (this.recentPeak(now) - spread < this.requiredDrop) {
+      this.streak = 0
+      return false
+    }
+    this.streak += 1
+    if (this.streak < THUMB_THRESHOLDS.confirmFrames) return false
+    this.streak = 0
     this.armed = false
     this.trough = spread
     out.x = sample.aim.x
