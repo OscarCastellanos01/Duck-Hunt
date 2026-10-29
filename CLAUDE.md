@@ -74,6 +74,8 @@ src/
     types.ts               # shared types (Landmark, HandFrame, GameEvents...)
   input/
     InputProvider.ts       # common interface
+    InputController.ts     # switches the active provider (mouse or camera)
+    GestureInput.ts        # camera provider: tracker + camera + gesture machine
     CameraInput.ts         # getUserMedia + device selection + frame loop
     HandTracker.ts         # wraps the MediaPipe Hand Landmarker, returns HandFrame
     MouseInput.ts          # fallback provider (mouse) for development and testing
@@ -84,8 +86,7 @@ src/
     shootDetectors.ts      # ThumbDropDetector and RecoilDetector (same interface)
     gestureMachine.ts      # FSM: Idle → Gun → Shoot → Cooldown; emits events
     fixture.ts             # landmark recording format: parsing and replay helpers
-  debug/                   # metrics, debug overlay, landmark renderer, fixture recorder
-  prototype/               # phase 1 camera and gesture prototype (replaced by the game in phase 2)
+  debug/                   # metrics, debug overlay, camera preview, landmark renderer, fixture recorder
   game/
     scenes/                # Boot, Preload, Calibration, Menu, Game, GameOver, Settings
     entities/              # Duck, Crosshair, ...

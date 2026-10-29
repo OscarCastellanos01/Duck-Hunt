@@ -1,11 +1,55 @@
+import Phaser from 'phaser'
 import '@/style.css'
+import { GAME_CONFIG } from '@/core/config'
 import { EventBus } from '@/core/eventBus'
+import { HighScoreStore } from '@/core/highScore'
 import { SettingsStore } from '@/core/settings'
 import type { GameEvents } from '@/core/types'
-import { PrototypeApp } from '@/prototype/PrototypeApp'
+import { CameraDebug } from '@/debug/CameraDebug'
+import { BootScene } from '@/game/scenes/BootScene'
+import { GameOverScene } from '@/game/scenes/GameOverScene'
+import { GameScene } from '@/game/scenes/GameScene'
+import { MenuScene } from '@/game/scenes/MenuScene'
+import { PreloadScene } from '@/game/scenes/PreloadScene'
+import { SERVICES_KEY, type Services } from '@/game/services'
+import { GestureInput } from '@/input/GestureInput'
+import { InputController } from '@/input/InputController'
+import { MouseInput } from '@/input/MouseInput'
 
-const eventBus = new EventBus<GameEvents>()
+const gameRoot = document.querySelector<HTMLDivElement>('#game')
+const overlayRoot = document.querySelector<HTMLDivElement>('#overlay')
+if (!gameRoot || !overlayRoot) throw new Error('Missing #game or #overlay container')
+
+const bus = new EventBus<GameEvents>()
 const settings = new SettingsStore(window.localStorage)
+const highScore = new HighScoreStore(window.localStorage)
+const debug = new CameraDebug(overlayRoot, bus, settings)
 
-const root = document.querySelector<HTMLDivElement>('#app')
-if (root) new PrototypeApp(root, eventBus, settings).mount()
+let canvas: HTMLCanvasElement | null = null
+const input = new InputController({
+  mouse: () => new MouseInput(bus, () => canvas),
+  camera: () => new GestureInput(bus, settings, debug),
+})
+const services: Services = { bus, settings, highScore, input }
+
+const game = new Phaser.Game({
+  type: Phaser.AUTO,
+  parent: gameRoot,
+  width: GAME_CONFIG.width,
+  height: GAME_CONFIG.height,
+  backgroundColor: '#000000',
+  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+  scene: [BootScene, PreloadScene, MenuScene, GameScene, GameOverScene],
+  callbacks: {
+    preBoot: (instance) => instance.registry.set(SERVICES_KEY, services),
+    postBoot: (instance) => {
+      canvas = instance.canvas
+      void input.use('mouse')
+    },
+  },
+})
+
+window.addEventListener('beforeunload', () => {
+  input.stop()
+  game.destroy(true)
+})

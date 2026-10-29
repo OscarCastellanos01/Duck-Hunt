@@ -79,3 +79,64 @@ export const DEBUG_CONFIG = {
   overlayRefreshMs: 250,
   statsWindow: 120,
 }
+
+export const GAME_CONFIG = {
+  width: 960,
+  height: 540,
+  ammoPerWave: 3,
+  wavesPerRound: 5,
+  roundQuota: 0.6,
+  introMs: 1500,
+  waveEndMs: 1200,
+  spawnStaggerMs: 500,
+  escapeDelayMs: 700,
+  hitboxScale: 1.3,
+  aimAssistPx: 18,
+  streakStep: 0.25,
+  maxMultiplier: 3,
+  roundClearBonus: 500,
+  shakeDurationMs: 80,
+  shakeIntensity: 0.004,
+  flashAlpha: 0.25,
+  flashMs: 90,
+  floatingTextMs: 800,
+  playBounds: { left: 0, right: 960, top: 60, bottom: 400 },
+  spawnMargin: 80,
+  fallSpeed: 520,
+  groundY: 450,
+}
+
+export type DuckType = 'common' | 'fast' | 'golden'
+
+export const DUCK_TYPES: Record<DuckType, { points: number; speed: number; scale: number }> = {
+  common: { points: 100, speed: 1, scale: 1 },
+  fast: { points: 200, speed: 1.5, scale: 0.85 },
+  golden: { points: 500, speed: 2, scale: 0.7 },
+}
+
+export const DIFFICULTY_CONFIG = {
+  baseSpeed: 180,
+  speedPerRound: 0.12,
+  maxSpeedMultiplier: 2.5,
+  fastChanceBase: 0.1,
+  fastChancePerRound: 0.05,
+  fastChanceMax: 0.5,
+  goldenChanceBase: 0.03,
+  goldenChancePerRound: 0.01,
+  goldenChanceMax: 0.15,
+  secondDuckRound: 3,
+  thirdDuckRound: 6,
+  waveDurationBaseMs: 7000,
+  waveDurationPerRoundMs: 300,
+  waveDurationMinMs: 4000,
+  unpredictabilityPerRound: 0.15,
+  unpredictabilityMax: 0.9,
+  turnIntervalSlowMs: 2500,
+  turnIntervalFastMs: 900,
+  wobbleAmplitudeMin: 8,
+  wobbleAmplitudeMax: 30,
+  wobbleFrequencyMin: 1.5,
+  wobbleFrequencyMax: 4,
+  launchAngleMaxRad: 0.6,
+  escapeSpeed: 420,
+}
