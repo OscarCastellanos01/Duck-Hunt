@@ -10,3 +10,8 @@ public/mediapipe/wasm/*
 !public/mediapipe/wasm/.gitkeep
 public/models/*
 !public/models/.gitkeep
+public/assets/*.url
+public/assets/Vector/
+public/assets/Spritesheets/
+public/assets/Preview.png
+public/assets/Sample.png

@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { GAME_CONFIG } from '@/core/config'
 import type { EventBus } from '@/core/eventBus'
 import type { GameEvents } from '@/core/types'
+import { UI_DEPTH } from '@/game/ui/Backdrop'
 
 const NORMAL_COLOR = 0x2b3a4a
 const HOVER_COLOR = 0x3d6a99
@@ -28,6 +29,7 @@ export class Button extends Phaser.GameObjects.Container {
       .text(0, 0, text, { fontFamily: 'system-ui, sans-serif', fontSize: '28px', color: '#ffffff' })
       .setOrigin(0.5)
     this.add([this.background, this.label])
+    this.setDepth(UI_DEPTH)
     scene.add.existing(this)
   }
 

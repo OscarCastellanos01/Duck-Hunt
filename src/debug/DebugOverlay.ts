@@ -2,13 +2,14 @@ import { DEBUG_CONFIG } from '@/core/config'
 import type { FrameTiming, Pose } from '@/core/types'
 import { FpsCounter, RollingStats } from '@/debug/metrics'
 import type { GestureState } from '@/gestures/gestureMachine'
+import type { PoseMetrics } from '@/gestures/poseDetector'
 
 export interface OverlayInfo {
   delegate: string
   pose: Pose
   state: GestureState
   tracking: boolean
-  thumbSpread: number
+  metrics: PoseMetrics
 }
 
 const P95 = 0.95
@@ -61,7 +62,9 @@ export class DebugOverlay {
       `Delegate: ${info.delegate}`,
       `Tracking: ${info.tracking ? 'yes' : 'no'}`,
       `Pose / state: ${info.pose} / ${info.state}`,
-      `Thumb spread: ${info.thumbSpread.toFixed(2)}`,
+      `Index ext: ${info.metrics.index.toFixed(2)}`,
+      `Middle / ring / pinky ext: ${info.metrics.middle.toFixed(2)} / ${info.metrics.ring.toFixed(2)} / ${info.metrics.pinky.toFixed(2)}`,
+      `Thumb spread: ${info.metrics.thumb.toFixed(2)}`,
     ].join('\n')
   }
 

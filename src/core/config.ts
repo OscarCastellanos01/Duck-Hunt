@@ -13,7 +13,7 @@ export const SMOOTHING_PRESETS: Record<SmoothingPreset, OneEuroParams> = {
 
 export const DEFAULT_SETTINGS: Settings = {
   gestureMode: 'thumb',
-  thumbSensitivity: 0.5,
+  thumbSensitivity: 0.7,
   recoilSensitivity: 0.5,
   cooldownMs: 250,
   smoothingPreset: 'balanced',
@@ -49,19 +49,19 @@ export const MEDIAPIPE_CONFIG = {
 export const AIM_REGION = { minX: 0.15, maxX: 0.85, minY: 0.15, maxY: 0.85 }
 
 export const POSE_THRESHOLDS = {
-  indexExtendEnter: 0.35,
-  indexExtendHold: 0.2,
-  curlEnter: -0.05,
-  curlHold: 0.1,
-  thumbExtendEnter: 0.75,
+  indexExtendEnter: 0.3,
+  indexExtendHold: 0.15,
+  curlEnter: 0.05,
+  curlHold: 0.2,
+  thumbExtendEnter: 0.65,
   enterFrames: 3,
   exitFrames: 3,
 }
 
 export const THUMB_THRESHOLDS = {
-  fireMin: 0.45,
-  fireMax: 0.65,
-  rearmGap: 0.1,
+  fireMin: 0.4,
+  fireMax: 0.75,
+  rearmGap: 0.08,
 }
 
 export const RECOIL_THRESHOLDS = {
@@ -103,7 +103,8 @@ export const GAME_CONFIG = {
   playBounds: { left: 0, right: 960, top: 60, bottom: 400 },
   spawnMargin: 80,
   fallSpeed: 520,
-  groundY: 450,
+  groundY: 470,
+  duckSpriteFacesLeft: true,
 }
 
 export type DuckType = 'common' | 'fast' | 'golden'

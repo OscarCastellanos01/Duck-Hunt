@@ -62,7 +62,7 @@ export class Duck extends Phaser.GameObjects.Image {
     }
     this.motion.step(dtMs)
     this.setPosition(this.motion.x, this.motion.y)
-    this.setFlipX(!this.motion.facingRight)
+    this.setFlipX(this.motion.facingRight === GAME_CONFIG.duckSpriteFacesLeft)
     if (this.currentStatus === 'escaping' && this.motion.offscreen) this.remove()
   }
 

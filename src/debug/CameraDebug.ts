@@ -6,7 +6,7 @@ import { DebugOverlay } from '@/debug/DebugOverlay'
 import { FixtureRecorder, downloadJson } from '@/debug/FixtureRecorder'
 import { LandmarkRenderer } from '@/debug/LandmarkRenderer'
 import type { GestureState } from '@/gestures/gestureMachine'
-import { thumbSpread } from '@/gestures/handGeometry'
+import { computePoseMetrics, createPoseMetrics } from '@/gestures/poseDetector'
 
 const TOGGLE_DEBUG_KEY = 'd'
 const TOGGLE_PREVIEW_KEY = 'p'
@@ -22,6 +22,7 @@ export class CameraDebug {
   private pose: Pose = 'none'
   private tracking = false
   private lastTiming: FrameTiming | null = null
+  private readonly metrics = createPoseMetrics()
 
   constructor(
     root: HTMLElement,
@@ -90,7 +91,7 @@ export class CameraDebug {
       pose: this.pose,
       state,
       tracking: this.tracking,
-      thumbSpread: frame ? thumbSpread(frame) : 0,
+      metrics: frame ? computePoseMetrics(frame, this.metrics) : this.metrics,
     })
   }
 

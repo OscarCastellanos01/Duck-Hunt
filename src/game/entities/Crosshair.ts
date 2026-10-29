@@ -4,6 +4,7 @@ import type { EventBus } from '@/core/eventBus'
 import type { GameEvents } from '@/core/types'
 
 const CROSSHAIR_DEPTH = 1000
+const IDLE_ALPHA = 0.45
 
 export class Crosshair extends Phaser.GameObjects.Image {
   constructor(scene: Phaser.Scene, bus: EventBus<GameEvents>) {
@@ -13,6 +14,14 @@ export class Crosshair extends Phaser.GameObjects.Image {
     const off = bus.on('aim', ({ x, y }) => {
       this.setPosition(x * GAME_CONFIG.width, y * GAME_CONFIG.height)
     })
-    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, off)
+    const offPose = bus.on('poseChanged', ({ pose }) =>
+      this.setAlpha(pose === 'gun' ? 1 : IDLE_ALPHA),
+    )
+    const offLost = bus.on('trackingLost', () => this.setAlpha(IDLE_ALPHA))
+    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      off()
+      offPose()
+      offLost()
+    })
   }
 }

@@ -42,7 +42,8 @@ export const FINGERS = {
 const distanceBetween = (a: Landmark, b: Landmark, aspect: number): number => {
   const dx = (a.x - b.x) * aspect
   const dy = a.y - b.y
-  return Math.hypot(dx, dy)
+  const dz = (a.z - b.z) * aspect
+  return Math.hypot(dx, dy, dz)
 }
 
 export const landmarkDistance = (frame: HandFrame, i: number, j: number): number => {

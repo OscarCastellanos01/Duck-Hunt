@@ -1,7 +1,6 @@
 import Phaser from 'phaser'
 import { ASSET_MANIFEST, IMAGE_KEYS } from '@/assets/manifest'
 import { GAME_CONFIG } from '@/core/config'
-import { generatePlaceholder } from '@/game/placeholderArt'
 import { SCENE_KEYS } from '@/game/scenes/keys'
 
 const BAR_WIDTH = 400
@@ -33,12 +32,11 @@ export class PreloadScene extends Phaser.Scene {
     })
     for (const key of IMAGE_KEYS) {
       const path = ASSET_MANIFEST.images[key]
-      if (path) this.load.image(key, path)
+      this.load.image(key, path)
     }
   }
 
   create(): void {
-    for (const key of IMAGE_KEYS) generatePlaceholder(this, key)
     this.scene.start(SCENE_KEYS.menu)
   }
 }

@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { GAME_CONFIG } from '@/core/config'
 import type { InputMode } from '@/core/types'
 import { Crosshair } from '@/game/entities/Crosshair'
+import { UI_DEPTH, createBackdrop } from '@/game/ui/Backdrop'
 import { SCENE_KEYS } from '@/game/scenes/keys'
 import { getServices, type Services } from '@/game/services'
 import { Button, ButtonGroup } from '@/game/ui/Button'
@@ -23,7 +24,7 @@ export class MenuScene extends Phaser.Scene {
     this.services = getServices(this)
     this.busy = false
     const centerX = GAME_CONFIG.width / 2
-    this.add.image(0, 0, 'background').setOrigin(0)
+    createBackdrop(this)
     this.add
       .text(centerX, 90, 'duck-gesture', {
         fontFamily: FONT,
@@ -33,6 +34,7 @@ export class MenuScene extends Phaser.Scene {
         strokeThickness: 8,
       })
       .setOrigin(0.5)
+      .setDepth(UI_DEPTH)
     this.add
       .text(centerX, 150, `Best score: ${this.services.highScore.get()}`, {
         fontFamily: FONT,
@@ -42,6 +44,7 @@ export class MenuScene extends Phaser.Scene {
         strokeThickness: 4,
       })
       .setOrigin(0.5)
+      .setDepth(UI_DEPTH)
 
     const buttons = new ButtonGroup(this, this.services.bus)
     buttons.add(
@@ -82,6 +85,7 @@ export class MenuScene extends Phaser.Scene {
         },
       )
       .setOrigin(0.5)
+      .setDepth(UI_DEPTH)
     this.status = this.add
       .text(centerX, 470, '', {
         fontFamily: FONT,
@@ -92,6 +96,7 @@ export class MenuScene extends Phaser.Scene {
         strokeThickness: 4,
       })
       .setOrigin(0.5)
+      .setDepth(UI_DEPTH)
 
     new Crosshair(this, this.services.bus)
   }

@@ -64,4 +64,4 @@ Only freely licensed assets are used (CC0, such as the Kenney "Shooting Gallery"
 
 ## Status
 
-Early development. The game is playable with the mouse or the camera: rounds, waves, three duck types, ammo, streak scoring and a stored high score. Placeholder art is generated in code until the Kenney assets are added.
+Early development. The game is playable with the mouse or the camera: rounds, waves, three duck types, ammo, streak scoring and a stored high score.

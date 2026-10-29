@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { GAME_CONFIG, TRACKING_FREEZE_MS } from '@/core/config'
 import { Crosshair } from '@/game/entities/Crosshair'
+import { createBackdrop } from '@/game/ui/Backdrop'
 import { Duck } from '@/game/entities/Duck'
 import { SCENE_KEYS, type GameOverData } from '@/game/scenes/keys'
 import { getServices, type Services } from '@/game/services'
@@ -51,7 +52,7 @@ export class GameScene extends Phaser.Scene {
     this.resultIndex = new Map()
     this.phase = 'intro'
 
-    this.add.image(0, 0, 'background').setOrigin(0)
+    createBackdrop(this)
     this.flash = this.add
       .rectangle(
         GAME_CONFIG.width / 2,

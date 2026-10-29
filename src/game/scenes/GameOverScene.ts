@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { GAME_CONFIG } from '@/core/config'
 import { Crosshair } from '@/game/entities/Crosshair'
+import { UI_DEPTH, createBackdrop } from '@/game/ui/Backdrop'
 import { SCENE_KEYS, type GameOverData } from '@/game/scenes/keys'
 import { getServices } from '@/game/services'
 import { Button, ButtonGroup } from '@/game/ui/Button'
@@ -18,14 +19,19 @@ export class GameOverScene extends Phaser.Scene {
     const services = getServices(this)
     const centerX = GAME_CONFIG.width / 2
     const style = { fontFamily: FONT, color: '#ffffff', stroke: '#000000', strokeThickness: 6 }
-    this.add.image(0, 0, 'background').setOrigin(0)
-    this.add.text(centerX, 100, 'Game over', { ...style, fontSize: '72px' }).setOrigin(0.5)
+    createBackdrop(this)
+    this.add
+      .text(centerX, 100, 'Game over', { ...style, fontSize: '72px' })
+      .setOrigin(0.5)
+      .setDepth(UI_DEPTH)
     this.add
       .text(centerX, 190, `Score ${data.score}`, { ...style, fontSize: '40px' })
       .setOrigin(0.5)
+      .setDepth(UI_DEPTH)
     this.add
       .text(centerX, 240, `Reached round ${data.round}`, { ...style, fontSize: '26px' })
       .setOrigin(0.5)
+      .setDepth(UI_DEPTH)
     const best = data.newRecord ? 'New record!' : `Best ${services.highScore.get()}`
     this.add
       .text(centerX, 285, best, {
@@ -34,6 +40,7 @@ export class GameOverScene extends Phaser.Scene {
         color: data.newRecord ? '#ffd23f' : '#ffffff',
       })
       .setOrigin(0.5)
+      .setDepth(UI_DEPTH)
 
     const buttons = new ButtonGroup(this, services.bus)
     buttons.add(
