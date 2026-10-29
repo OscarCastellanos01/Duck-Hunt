@@ -7,6 +7,18 @@ export interface Landmark {
 export interface HandFrame {
   landmarks: Landmark[]
   t: number
+  aspect: number
+}
+
+export interface AimPoint {
+  x: number
+  y: number
+}
+
+export interface FrameTiming {
+  captureTime: number
+  inferenceStart: number
+  inferenceEnd: number
 }
 
 export type Pose = 'none' | 'gun'

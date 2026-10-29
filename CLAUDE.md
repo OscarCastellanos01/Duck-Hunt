@@ -11,6 +11,7 @@ This document defines the technical specification and engineering conventions of
 ## Goals and non-goals
 
 **Goals**
+
 - Real-time hand and gesture detection in the browser, without a server.
 - Low and stable latency (see the performance budget).
 - Clean architecture: the game never touches landmarks and only consumes events.
@@ -18,6 +19,7 @@ This document defines the technical specification and engineering conventions of
 - Works on desktop and on Android (Chrome), installable as a PWA.
 
 **Non-goals (for now)**
+
 - Backend, accounts, global leaderboards, advertising, app stores (Capacitor).
 - Multiplayer.
 - Reproducing Nintendo characters, sprites, sounds or music.
@@ -26,22 +28,22 @@ This document defines the technical specification and engineering conventions of
 
 The stack below is fixed. Any change requires prior review.
 
-| Layer | Technology |
-|---|---|
-| Language | TypeScript (`strict: true`), pinned to 6.x until `typescript-eslint` supports 7 |
-| Build / package manager | Vite + pnpm |
-| Camera | `getUserMedia` (WebRTC), ideal 640x480 @ 60 fps |
-| Hand detection | `@mediapipe/tasks-vision` (Hand Landmarker, GPU delegate, `runningMode: "VIDEO"`, 1 hand) |
-| Frame synchronization | `HTMLVideoElement.requestVideoFrameCallback` (fallback to `requestAnimationFrame`) |
-| Gestures | Custom TypeScript: One Euro Filter + state machine |
-| Game | Phaser 3 (scenes, sprites, arcade physics, particles, tweens) |
-| Audio | Phaser / Web Audio + effects generated with jsfxr |
-| Quality | ESLint + Prettier + Vitest |
-| E2E | Playwright (Chrome fake camera) |
-| PWA | `vite-plugin-pwa` |
-| Hosting | Cloudflare Pages |
-| Persistence | `localStorage` (high score and settings) |
-| Debug | Custom overlay with fps and latency (`stats.js` + `performance.now()`) |
+| Layer                   | Technology                                                                                |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| Language                | TypeScript (`strict: true`), pinned to 6.x until `typescript-eslint` supports 7           |
+| Build / package manager | Vite + pnpm                                                                               |
+| Camera                  | `getUserMedia` (WebRTC), ideal 640x480 @ 60 fps                                           |
+| Hand detection          | `@mediapipe/tasks-vision` (Hand Landmarker, GPU delegate, `runningMode: "VIDEO"`, 1 hand) |
+| Frame synchronization   | `HTMLVideoElement.requestVideoFrameCallback` (fallback to `requestAnimationFrame`)        |
+| Gestures                | Custom TypeScript: One Euro Filter + state machine                                        |
+| Game                    | Phaser 3 (scenes, sprites, arcade physics, particles, tweens)                             |
+| Audio                   | Phaser / Web Audio + effects generated with jsfxr                                         |
+| Quality                 | ESLint + Prettier + Vitest                                                                |
+| E2E                     | Playwright (Chrome fake camera)                                                           |
+| PWA                     | `vite-plugin-pwa`                                                                         |
+| Hosting                 | Cloudflare Pages                                                                          |
+| Persistence             | `localStorage` (high score and settings)                                                  |
+| Debug                   | Custom overlay with fps and latency (`stats.js` + `performance.now()`)                    |
 
 ## Commands
 
@@ -81,6 +83,9 @@ src/
     poseDetector.ts        # is it a gun pose? (pure functions + hysteresis)
     shootDetectors.ts      # ThumbDropDetector and RecoilDetector (same interface)
     gestureMachine.ts      # FSM: Idle → Gun → Shoot → Cooldown; emits events
+    fixture.ts             # landmark recording format: parsing and replay helpers
+  debug/                   # metrics, debug overlay, landmark renderer, fixture recorder
+  prototype/               # phase 1 camera and gesture prototype (replaced by the game in phase 2)
   game/
     scenes/                # Boot, Preload, Calibration, Menu, Game, GameOver, Settings
     entities/              # Duck, Crosshair, ...
@@ -88,6 +93,8 @@ src/
     ui/                    # HUD, debug overlay, settings panel
   assets/
     manifest.ts            # single place that maps logical names → files
+scripts/
+  setup-mediapipe.mjs      # copies the WASM runtime and downloads the model
 public/
   assets/                  # sprites, audio (freely licensed only)
   mediapipe/wasm/          # MediaPipe runtime served from our own domain
@@ -124,10 +131,12 @@ MediaPipe landmarks (21 points): 0 wrist; 1-4 thumb (CMC, MCP, IP, TIP); 5-8 ind
 Setting `gestureMode`: `'thumb' | 'recoil' | 'both'`. **Default: `'thumb'`**.
 
 1. **`thumb` — thumb drop (the hammer).** The thumb drops toward the middle finger or the index base without moving the hand. Computed as the distance from the thumb tip (4) to the middle finger base (9), normalized by hand size. A shot fires when the threshold is crossed downward (with hysteresis to rearm). It is a pose change detectable in 1-2 frames and does not move the aim.
-2. **`recoil` — upward kick.** With the gun pose active, an upward vertical impulse of the hand (index base or wrist) above a normalized velocity threshold within a short window (~100-150 ms). **Design constraint:** because the hand rises when firing, the aim shifts. The shot position is therefore taken from a **circular buffer** of positions, using the aim from ~100-150 ms *before* the impulse (parameter `recoilAimLookbackMs`).
+2. **`recoil` — upward kick.** With the gun pose active, an upward vertical impulse of the hand (index base or wrist) above a normalized velocity threshold within a short window (~100-150 ms). **Design constraint:** because the hand rises when firing, the aim shifts. The shot position is therefore taken from a **circular buffer** of positions, using the aim from ~100-150 ms _before_ the impulse (parameter `recoilAimLookbackMs`).
 3. **`both`**: either gesture fires. They share the same cooldown to avoid double shots.
 
-Both detectors implement the same interface (`ShootDetector.update(frame): ShootEvent | null`).
+Both detectors implement the same interface. `ShootDetector.update(sample, out)` receives a sample (hand frame, smoothed aim and pose state), writes the shot into a reused `out` event and returns whether it fired, which avoids per-frame allocations.
+
+The gun pose requires an extended thumb only to be entered. Once active, the thumb is ignored when deciding whether to leave the pose, because the thumb drop is the trigger gesture of the `thumb` mode.
 
 ### State machine
 

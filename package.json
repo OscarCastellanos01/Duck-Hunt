@@ -5,16 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:https": "vite --host --mode https",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "setup:mediapipe": "node scripts/setup-mediapipe.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.6.5",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.13.0",
@@ -23,5 +26,8 @@
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "^1.2.0"
   }
 }

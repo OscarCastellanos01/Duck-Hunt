@@ -37,8 +37,11 @@ TypeScript (strict), Vite, pnpm, `@mediapipe/tasks-vision`, Phaser 3, Vitest, Pl
 
 ```bash
 pnpm install
+pnpm setup:mediapipe
 pnpm dev
 ```
+
+`pnpm setup:mediapipe` copies the MediaPipe WASM runtime and downloads the hand landmarker model so both are served from the application's own domain. To try the app from a phone on the local network, use `pnpm dev:https`.
 
 `localhost` is allowed to use the camera without HTTPS. Other scripts:
 
@@ -61,4 +64,4 @@ Only freely licensed assets are used (CC0, such as the Kenney "Shooting Gallery"
 
 ## Status
 
-Early development. The project skeleton is in place and the camera and gesture prototype is next.
+Early development. A camera and gesture prototype (hand tracking, gun pose, both shoot gestures and a debug overlay) is available. The Phaser game is next.

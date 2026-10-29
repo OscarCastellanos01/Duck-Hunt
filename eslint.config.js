@@ -16,5 +16,9 @@ export default tseslint.config(
       'no-console': 'error',
     },
   },
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: globals.node },
+  },
   prettier,
 )

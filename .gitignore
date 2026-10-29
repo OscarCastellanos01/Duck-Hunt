@@ -5,3 +5,8 @@ src/assets/manifest.local.ts
 *.local
 .DS_Store
 CLAUDE.local.md
+
+public/mediapipe/wasm/*
+!public/mediapipe/wasm/.gitkeep
+public/models/*
+!public/models/.gitkeep

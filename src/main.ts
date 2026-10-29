@@ -1,10 +1,11 @@
-import { APP_NAME } from '@/core/config'
+import '@/style.css'
 import { EventBus } from '@/core/eventBus'
 import { SettingsStore } from '@/core/settings'
 import type { GameEvents } from '@/core/types'
+import { PrototypeApp } from '@/prototype/PrototypeApp'
 
-export const eventBus = new EventBus<GameEvents>()
-export const settings = new SettingsStore(window.localStorage)
+const eventBus = new EventBus<GameEvents>()
+const settings = new SettingsStore(window.localStorage)
 
-const app = document.querySelector<HTMLDivElement>('#app')
-if (app) app.textContent = APP_NAME
+const root = document.querySelector<HTMLDivElement>('#app')
+if (root) new PrototypeApp(root, eventBus, settings).mount()
